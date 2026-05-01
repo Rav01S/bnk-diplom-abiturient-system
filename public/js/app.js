@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Auto-hide flash messages after 5 seconds
-  document.querySelectorAll('[class*="bg-green-50"]').forEach(function (el) {
+  document.querySelectorAll('[data-flash-message]').forEach(function (el) {
     setTimeout(function () {
       el.style.transition = 'opacity 0.5s';
       el.style.opacity = '0';

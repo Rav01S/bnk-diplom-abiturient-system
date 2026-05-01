@@ -109,6 +109,20 @@ class Application extends Model
     }
 
     /**
+     * Средний балл по первым трём предметам для ранжирования.
+     */
+    public function getAverageScoreAttribute(): float
+    {
+        $scores = $this->scores->take(3);
+
+        if ($scores->isEmpty()) {
+            return 0;
+        }
+
+        return round($scores->avg('score'), 2);
+    }
+
+    /**
      * Можно ли редактировать заявление.
      */
     public function isEditable(): bool

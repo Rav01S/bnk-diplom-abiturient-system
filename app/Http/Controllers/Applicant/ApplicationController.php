@@ -7,6 +7,7 @@ use App\Http\Requests\ApplicationStoreRequest;
 use App\Models\Application;
 use App\Models\ApplicationScore;
 use App\Models\Program;
+use App\Models\Specialty;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,22 +57,39 @@ class ApplicationController extends Controller
     {
         $applicant = auth()->user()->applicant;
 
-        // Проверка лимита 5 активных заявлений
-        $activeCount = $applicant->applications()->active()->count();
-        if ($activeCount >= 5) {
+        if (! $applicant->isProfileComplete()) {
             return view('applicant.application-create', [
-                'limitReached' => true,
+                'limitReached' => false,
+                'profileIncomplete' => true,
                 'programs' => collect(),
                 'applicant' => $applicant,
             ]);
         }
 
-        // Открытые программы
-        $programs = Program::open()->with('specialty')->get();
+        // Проверка лимита 5 активных заявлений
+        $activeCount = $applicant->applications()->active()->count();
+        if ($activeCount >= 5) {
+            return view('applicant.application-create', [
+                'limitReached' => true,
+                'profileIncomplete' => false,
+                'programs' => collect(),
+                'applicant' => $applicant,
+            ]);
+        }
+
+        // Все созданные программы показываем в списке, недоступные помечаются в интерфейсе.
+        $programs = Program::with('specialty')->where('is_open', true)->get();
+        $specialtiesWithoutPrograms = Specialty::doesntHave('programs')->get();
+        $occupiedPriorities = $applicant->applications()->active()->pluck('priority')->all();
+        $maxSelectablePriority = min($activeCount + 1, 5);
 
         return view('applicant.application-create', [
             'limitReached' => false,
+            'profileIncomplete' => false,
             'programs' => $programs,
+            'specialtiesWithoutPrograms' => $specialtiesWithoutPrograms,
+            'occupiedPriorities' => $occupiedPriorities,
+            'maxSelectablePriority' => $maxSelectablePriority,
             'applicant' => $applicant,
         ]);
     }
@@ -84,6 +102,11 @@ class ApplicationController extends Controller
         $applicant = auth()->user()->applicant;
         $validated = $request->validated();
 
+        if (! $applicant->isProfileComplete()) {
+            return redirect()->route('applicant.profile')
+                ->withErrors(['profile' => 'Заполните профиль абитуриента перед подачей заявления.']);
+        }
+
         // Повторная проверка лимита
         $activeCount = $applicant->applications()->active()->count();
         if ($activeCount >= 5) {
@@ -92,8 +115,20 @@ class ApplicationController extends Controller
 
         // Проверка, что программа открыта
         $program = Program::findOrFail($validated['program_id']);
-        if (! $program->isAcceptingApplications()) {
+        if (! $program->is_open) {
             return back()->withErrors(['program_id' => 'Программа не принимает заявления.']);
+        }
+
+        if ($validated['study_form'] === 'part_time' && ! $program->has_study_form) {
+            return back()->withErrors(['study_form' => 'Для выбранной программы доступна только очная форма обучения.']);
+        }
+
+        if ($validated['funding_type'] === 'budget' && $program->plan_count <= 0) {
+            return back()->withErrors(['funding_type' => 'Для выбранной программы нет бюджетных мест.']);
+        }
+
+        if ($validated['funding_type'] === 'paid' && $program->plan_count_paid <= 0) {
+            return back()->withErrors(['funding_type' => 'Для выбранной программы нет платных мест.']);
         }
 
         $application = DB::transaction(function () use ($applicant, $validated, $program, $request): Application {
@@ -121,6 +156,7 @@ class ApplicationController extends Controller
             }
 
             $application->save();
+            $this->insertApplicationPriority($applicant, $application, (int) $validated['priority']);
 
             // Баллы по предметам
             foreach ($validated['scores'] as $scoreData) {
@@ -155,9 +191,14 @@ class ApplicationController extends Controller
         }
 
         $application->load('program.specialty', 'scores');
-        $programs = Program::open()->with('specialty')->get();
+        $programs = Program::with('specialty')->where('is_open', true)->get();
+        $occupiedPriorities = auth()->user()->applicant->applications()
+            ->active()
+            ->whereKeyNot($application->id)
+            ->pluck('priority')
+            ->all();
 
-        return view('applicant.application-edit', compact('application', 'programs'));
+        return view('applicant.application-edit', compact('application', 'programs', 'occupiedPriorities'));
     }
 
     /**
@@ -201,6 +242,7 @@ class ApplicationController extends Controller
             $application->status = 'submitted';
             $application->rejection_reason = null;
             $application->save();
+            $this->insertApplicationPriority($applicant, $application, (int) $validated['priority']);
 
             // Обновление баллов
             $application->scores()->delete();
@@ -277,6 +319,38 @@ class ApplicationController extends Controller
     {
         if ($application->applicant_id !== auth()->user()->applicant->id) {
             abort(403);
+        }
+    }
+
+    /**
+     * Вставляет заявление в выбранный приоритет и сдвигает занятые ниже.
+     */
+    private function insertApplicationPriority($applicant, Application $target, int $desiredPriority): void
+    {
+        $desiredPriority = max(1, min(5, $desiredPriority));
+
+        $otherApplications = $applicant->applications()
+            ->active()
+            ->whereKeyNot($target->id)
+            ->orderBy('priority')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($otherApplications->values() as $index => $application) {
+            $normalizedPriority = $index + 1;
+            $newPriority = $normalizedPriority >= $desiredPriority
+                ? $normalizedPriority + 1
+                : $normalizedPriority;
+
+            if ($application->priority !== $newPriority) {
+                $application->priority = $newPriority;
+                $application->save();
+            }
+        }
+
+        if ($target->priority !== $desiredPriority) {
+            $target->priority = $desiredPriority;
+            $target->save();
         }
     }
 }

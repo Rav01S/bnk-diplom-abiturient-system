@@ -19,8 +19,8 @@
       <div><label for="first_name" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Имя</label><input type="text" id="first_name" name="first_name" required value="{{ old('first_name', $applicant->first_name) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div><label for="middle_name" class="block text-sm font-medium text-gray-700 mb-1">Отчество</label><input type="text" id="middle_name" name="middle_name" value="{{ old('middle_name', $applicant->middle_name) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div><label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Дата рождения</label><input type="date" id="birth_date" name="birth_date" required value="{{ old('birth_date', $applicant->birth_date?->format('Y-m-d')) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
-      <div><label for="phone" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Телефон</label><input type="tel" id="phone" name="phone" required value="{{ old('phone', $applicant->phone) }}" placeholder="+7 (999) 123-45-67" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
-      <div><label for="snils" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">СНИЛС</label><input type="text" id="snils" name="snils" required value="{{ old('snils', $applicant->snils) }}" placeholder="123-456-789 01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
+      <div><label for="phone" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Телефон</label><input type="tel" id="phone" name="phone" required value="{{ old('phone', $applicant->phone) }}" placeholder="+7 (999) 123-45-67" inputmode="tel" autocomplete="tel" maxlength="18" pattern="^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$" data-mask="phone" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
+      <div><label for="snils" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">СНИЛС</label><input type="text" id="snils" name="snils" required value="{{ old('snils', $applicant->snils) }}" placeholder="123-456-789 01" inputmode="numeric" maxlength="14" pattern="^\d{3}-\d{3}-\d{3} \d{2}$" data-mask="snils" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
     </div>
   </div>
 
@@ -35,7 +35,7 @@
     <div class="mt-4">
       <label class="block text-sm font-medium text-gray-700 mb-2">Фото разворота паспорта <span class="text-danger">*</span></label>
       <div class="flex flex-col sm:flex-row gap-4">
-        <div class="flex-1"><input type="file" name="photo_passport" accept="image/*" data-preview="passportPreview" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"><p class="mt-1 text-xs text-gray-500">JPEG, PNG до 5 МБ</p></div>
+        <div class="flex-1"><input type="file" name="photo_passport" accept="image/*" data-preview="passportPreview" {{ $applicant->photo_passport ? '' : 'required' }} class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"><p class="mt-1 text-xs text-gray-500">JPEG, PNG до 5 МБ</p></div>
         <div id="passportPreview" class="photo-preview flex items-center justify-center w-full sm:w-40 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           @if($applicant->photo_passport)
           <img src="{{ Storage::url($applicant->photo_passport) }}" alt="Паспорт" class="max-h-32 rounded-lg shadow-sm object-cover">
@@ -52,7 +52,7 @@
     <h3 class="font-medium text-gray-900 mb-4 pb-3 border-b border-gray-200">Документ об образовании</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div><label for="prev_education" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Уровень образования</label><select id="prev_education" name="prev_education" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white"><option value="">Выберите...</option><option value="9class" {{ old('prev_education', $applicant->prev_education)==='9class'?'selected':'' }}>9 классов</option><option value="11class" {{ old('prev_education', $applicant->prev_education)==='11class'?'selected':'' }}>11 классов</option><option value="spo" {{ old('prev_education', $applicant->prev_education)==='spo'?'selected':'' }}>СПО (колледж/техникум)</option><option value="vo" {{ old('prev_education', $applicant->prev_education)==='vo'?'selected':'' }}>ВО (неоконченное высшее)</option></select></div>
-      <div><label for="avg_cert_score" class="block text-sm font-medium text-gray-700 mb-1">Средний балл аттестата</label><input type="number" id="avg_cert_score" name="avg_cert_score" min="2" max="5" step="0.01" placeholder="4.75" value="{{ old('avg_cert_score', $applicant->avg_cert_score) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
+      <div><label for="avg_cert_score" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Средний балл аттестата</label><input type="text" id="avg_cert_score" name="avg_cert_score" required inputmode="decimal" placeholder="4.75" value="{{ old('avg_cert_score', $applicant->avg_cert_score) }}" data-mask="avg-score" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div><label for="edu_doc_series" class="block text-sm font-medium text-gray-700 mb-1">Серия документа</label><input type="text" id="edu_doc_series" name="edu_doc_series" value="{{ old('edu_doc_series', $applicant->edu_doc_series) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div><label for="edu_doc_number" class="block text-sm font-medium text-gray-700 mb-1">Номер документа</label><input type="text" id="edu_doc_number" name="edu_doc_number" value="{{ old('edu_doc_number', $applicant->edu_doc_number) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div class="sm:col-span-2"><label for="edu_doc_issued_by" class="block text-sm font-medium text-gray-700 mb-1">Кем выдан</label><input type="text" id="edu_doc_issued_by" name="edu_doc_issued_by" value="{{ old('edu_doc_issued_by', $applicant->edu_doc_issued_by) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
@@ -82,7 +82,7 @@
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
     <h3 class="font-medium text-gray-900 mb-4 pb-3 border-b border-gray-200">Дополнительно</h3>
     <div class="flex flex-col sm:flex-row gap-4">
-      <div class="flex-1"><label for="photo_snils" class="block text-sm font-medium text-gray-700 mb-2">Фото СНИЛС</label><input type="file" id="photo_snils" name="photo_snils" accept="image/*" data-preview="snilsPreview" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"></div>
+      <div class="flex-1"><label for="photo_snils" class="block text-sm font-medium text-gray-700 mb-2">Фото СНИЛС <span class="text-danger">*</span></label><input type="file" id="photo_snils" name="photo_snils" accept="image/*" data-preview="snilsPreview" {{ $applicant->photo_snils ? '' : 'required' }} class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"></div>
       <div id="snilsPreview" class="photo-preview flex items-center justify-center w-full sm:w-40 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
         @if($applicant->photo_snils)
         <img src="{{ Storage::url($applicant->photo_snils) }}" alt="СНИЛС" class="max-h-32 rounded-lg shadow-sm object-cover">
@@ -113,6 +113,43 @@ document.querySelectorAll('input[type="file"][data-preview]').forEach(input => {
     reader.onload = function(ev) { preview.innerHTML = '<img src="' + ev.target.result + '" alt="Предпросмотр" class="max-h-32 rounded-lg shadow-sm object-cover">'; };
     reader.readAsDataURL(file);
   });
+});
+
+function digitsOnly(value) {
+  return value.replace(/\D/g, '');
+}
+
+document.querySelector('[data-mask="phone"]')?.addEventListener('input', function() {
+  let digits = digitsOnly(this.value);
+  if (digits.startsWith('8')) digits = '7' + digits.slice(1);
+  if (!digits.startsWith('7')) digits = '7' + digits;
+  digits = digits.slice(0, 11);
+  const body = digits.slice(1);
+  let result = '+7';
+  if (body.length > 0) result += ' (' + body.slice(0, 3);
+  if (body.length >= 3) result += ')';
+  if (body.length > 3) result += ' ' + body.slice(3, 6);
+  if (body.length > 6) result += '-' + body.slice(6, 8);
+  if (body.length > 8) result += '-' + body.slice(8, 10);
+  this.value = result;
+});
+
+document.querySelector('[data-mask="snils"]')?.addEventListener('input', function() {
+  const digits = digitsOnly(this.value).slice(0, 11);
+  const parts = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 9)].filter(Boolean);
+  this.value = parts.join('-') + (digits.length > 9 ? ' ' + digits.slice(9, 11) : '');
+});
+
+document.querySelector('[data-mask="avg-score"]')?.addEventListener('input', function() {
+  let value = this.value.replace(',', '.').replace(/[^\d.]/g, '');
+  const firstDot = value.indexOf('.');
+  if (firstDot !== -1) {
+    value = value.slice(0, firstDot + 1) + value.slice(firstDot + 1).replace(/\./g, '');
+  }
+  if (value.length > 4) value = value.slice(0, 4);
+  const numeric = parseFloat(value);
+  if (!Number.isNaN(numeric) && numeric > 5) value = '5';
+  this.value = value;
 });
 </script>
 @endsection

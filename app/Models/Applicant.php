@@ -65,7 +65,13 @@ class Applicant extends Model
             && $this->birth_date
             && $this->passport_series
             && $this->passport_number
-            && $this->snils;
+            && $this->passport_issued_by
+            && $this->snils
+            && $this->phone
+            && $this->prev_education
+            && $this->avg_cert_score
+            && $this->photo_passport
+            && $this->photo_snils;
     }
 
     /** @return array<string, string> */

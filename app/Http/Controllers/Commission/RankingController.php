@@ -14,7 +14,7 @@ class RankingController extends Controller
     public function index(Request $request): View
     {
         $programs = Program::with('specialty')->get();
-        $selectedProgramId = $request->input('program_id');
+        $selectedProgramId = $request->input('program_id', $programs->first()?->id);
         $fundingType = $request->input('funding_type', 'budget');
 
         $ranking = collect();
@@ -28,7 +28,7 @@ class RankingController extends Controller
                 ->where('funding_type', $fundingType)
                 ->byStatus('approved')
                 ->get()
-                ->sortByDesc(fn ($app) => $app->total_score)
+                ->sortByDesc(fn ($app) => $app->average_score)
                 ->values();
         }
 
@@ -48,14 +48,14 @@ class RankingController extends Controller
             ->where('funding_type', $fundingType)
             ->byStatus('approved')
             ->get()
-            ->sortByDesc(fn ($app) => $app->total_score)
+            ->sortByDesc(fn ($app) => $app->average_score)
             ->values();
 
         return response()->streamDownload(function () use ($applications): void {
             $handle = fopen('php://output', 'w');
             // BOM для корректного отображения кириллицы в Excel
             fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['Место', 'ФИО', 'Балл 1', 'Балл 2', 'Балл 3', 'Сумма', 'Приоритет'], ';');
+            fputcsv($handle, ['Место', 'ФИО', 'Балл 1', 'Балл 2', 'Балл 3', 'Средний балл', 'Приоритет'], ';');
 
             foreach ($applications as $index => $app) {
                 $scores = $app->scores->pluck('score')->toArray();
@@ -65,7 +65,7 @@ class RankingController extends Controller
                     $scores[0] ?? '—',
                     $scores[1] ?? '—',
                     $scores[2] ?? '—',
-                    $app->total_score,
+                    number_format($app->average_score, 2, ',', ''),
                     $app->priority,
                 ], ';');
             }

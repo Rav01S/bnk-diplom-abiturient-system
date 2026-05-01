@@ -20,11 +20,20 @@
   <h2 class="text-xl font-semibold text-gray-900 mb-2">Лимит достигнут</h2>
   <p class="text-gray-600">Вы подали максимальное количество заявлений (5). Отмените одно из текущих, чтобы подать новое.</p>
 </div>
+@elseif($profileIncomplete ?? false)
+<div class="bg-white rounded-lg shadow-sm border border-yellow-200 p-8 text-center">
+  <svg class="mx-auto mb-4 h-16 w-16 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>
+  <h2 class="mb-2 text-xl font-semibold text-gray-900">Заполните профиль</h2>
+  <p class="mx-auto mb-6 max-w-xl text-gray-600">Подача заявления доступна только после заполнения обязательных данных профиля: телефон, СНИЛС, паспортные данные, образование, средний балл аттестата, фото паспорта и фото СНИЛС.</p>
+  <a href="{{ route('applicant.profile') }}" class="inline-flex items-center rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-primary-700">Перейти к профилю</a>
+</div>
 @else
-
-@if(!$applicant->isProfileComplete())
-<div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">⚠️ Профиль не заполнен полностью. <a href="{{ route('applicant.profile') }}" class="font-medium underline">Заполните профиль</a> перед подачей.</div>
-@endif
+@php
+  $occupiedPriorities = collect($occupiedPriorities ?? []);
+  $maxSelectablePriority = min((int) ($maxSelectablePriority ?? 1), 5);
+  $defaultPriority = collect(range(1, $maxSelectablePriority))->first(fn ($priority) => ! $occupiedPriorities->contains($priority)) ?? $maxSelectablePriority;
+  $selectedPriority = (int) old('priority', $defaultPriority);
+@endphp
 
 {{-- Wizard Progress --}}
 <div class="mb-6">
@@ -49,9 +58,11 @@
       <div><label for="program_id" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Специальность</label>
         <select id="program_id" name="program_id" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white">
           <option value="">Выберите специальность...</option>
-          @foreach($programs as $prog)<option value="{{ $prog->id }}" data-has-form="{{ $prog->has_study_form ? '1' : '0' }}" data-subjects='@json($prog->specialty->subjects)' @selected((int) old('program_id') === $prog->id)>{{ $prog->specialty->full_title }}{{ !$prog->has_study_form ? ' (только очная)' : '' }}</option>@endforeach
+          @foreach($programs as $prog)<option value="{{ $prog->id }}" data-accepting="1" data-has-form="{{ $prog->has_study_form ? '1' : '0' }}" data-plan-budget="{{ $prog->plan_count }}" data-plan-paid="{{ $prog->plan_count_paid }}" data-subjects='@json($prog->specialty->subjects)' @selected((int) old('program_id') === $prog->id)>{{ $prog->specialty->full_title }}{{ !$prog->has_study_form ? ' (только очная)' : '' }}</option>@endforeach
+          @foreach(($specialtiesWithoutPrograms ?? collect()) as $specialty)<option value="" disabled>{{ $specialty->full_title }} — программа приёма не создана</option>@endforeach
         </select>
         <p class="mt-1 text-xs text-gray-500">Код и название по ФГОС</p>
+        <p id="programHint" class="mt-2 hidden text-xs text-amber-700"></p>
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Форма обучения</label>
@@ -76,25 +87,30 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Финансирование</label>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label class="funding-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
+          <label id="budgetOption" class="funding-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
             <span>
               <span class="block text-sm font-medium text-gray-900">Бюджет</span>
               <span class="block text-xs text-gray-500">Обучение за счёт бюджетных мест</span>
             </span>
-            <input type="radio" name="funding_type" value="budget" class="h-4 w-4 text-primary-600" {{ old('funding_type', 'budget') === 'budget' ? 'checked' : '' }}>
+            <input id="budgetInput" type="radio" name="funding_type" value="budget" class="h-4 w-4 text-primary-600" {{ old('funding_type', 'budget') === 'budget' ? 'checked' : '' }}>
           </label>
-          <label class="funding-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
+          <label id="paidOption" class="funding-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
             <span>
               <span class="block text-sm font-medium text-gray-900">Платно</span>
               <span class="block text-xs text-gray-500">Обучение по договору об оказании платных услуг</span>
             </span>
-            <input type="radio" name="funding_type" value="paid" class="h-4 w-4 text-primary-600" {{ old('funding_type') === 'paid' ? 'checked' : '' }}>
+            <input id="paidInput" type="radio" name="funding_type" value="paid" class="h-4 w-4 text-primary-600" {{ old('funding_type') === 'paid' ? 'checked' : '' }}>
           </label>
         </div>
+        <p id="fundingHint" class="mt-2 hidden text-xs text-amber-700"></p>
       </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Приоритет заявления (1–5)</label>
-        <div class="flex items-center space-x-4"><input type="range" id="priorityRange" name="priority" min="1" max="5" value="{{ old('priority', 1) }}" class="flex-1"><span id="priorityValue" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-bold">{{ old('priority', 1) }}</span></div>
-        <p class="mt-1 text-xs text-gray-500">1 — высший приоритет, 5 — наименьший</p>
+      <div><label for="priorityInput" class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Приоритет заявления (1–5)</label>
+        <select id="priorityInput" name="priority" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white">
+          @for($i = 1; $i <= $maxSelectablePriority; $i++)
+            <option value="{{ $i }}" @selected($selectedPriority === $i)>{{ $i }}{{ $occupiedPriorities->contains($i) ? ' — занят, сдвинет следующие' : '' }}</option>
+          @endfor
+        </select>
+        <p class="mt-1 text-xs text-gray-500">1 — высший приоритет. При новой подаче доступен максимум: количество активных заявлений + 1, но не выше 5. Если номер занят, он и следующие сдвинутся на +1.</p>
       </div>
     </div>
     <div class="mt-8 flex justify-end"><button type="button" id="step1Next" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Далее →</button></div>
@@ -146,8 +162,7 @@
               <input type="checkbox" id="isBenefit" name="is_benefit" value="1" {{ old('is_benefit')?'checked':'' }} class="w-4 h-4 text-primary-600 rounded">
               <span class="ml-2 text-sm">Есть льготные права</span>
             </label>
-            <select id="benefitType" name="benefit_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm {{ old('is_benefit') ? 'bg-white' : 'bg-gray-50 opacity-50' }}" {{ old('is_benefit') ? '' : 'disabled' }}>
-              <option value="">Выберите тип льготы...</option>
+            <select id="benefitType" name="benefit_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm {{ old('is_benefit') ? 'bg-white' : 'bg-gray-50 opacity-50' }}" {{ old('is_benefit') ? 'required' : 'disabled' }}>
               <option value="olympiad" {{ old('benefit_type')==='olympiad'?'selected':'' }}>Олимпиада</option>
               <option value="disability" {{ old('benefit_type')==='disability'?'selected':'' }}>Инвалидность</option>
             </select>
@@ -198,7 +213,7 @@
       <div class="space-y-2 text-sm">
         <p>Заявление №: <strong>будет присвоен после отправки</strong></p>
         <p>Программа: <strong id="summaryProgram">—</strong></p>
-        <p>Приоритет: <strong id="summaryPriority">{{ old('priority', 1) }}</strong></p>
+        <p>Приоритет: <strong id="summaryPriority">{{ $selectedPriority }}</strong></p>
         <p>Статус после отправки: <span class="inline-flex rounded-full bg-primary-100 px-2.5 py-1 text-xs font-medium text-primary-700">На проверке</span></p>
       </div>
     </div>
@@ -212,19 +227,26 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const programSelect = document.getElementById('program_id');
-  const priorityRange = document.getElementById('priorityRange');
+  const priorityRange = document.getElementById('priorityInput');
   const priorityValue = document.getElementById('priorityValue');
   const subjectsContainer = document.getElementById('subjectsContainer');
   const step1Next = document.getElementById('step1Next');
+  const programHint = document.getElementById('programHint');
   const benefitCheck = document.getElementById('isBenefit');
   const benefitType = document.getElementById('benefitType');
   const partTimeOption = document.getElementById('partTimeOption');
   const partTimeInput = document.getElementById('partTimeInput');
   const studyFormHint = document.getElementById('studyFormHint');
+  const budgetOption = document.getElementById('budgetOption');
+  const budgetInput = document.getElementById('budgetInput');
+  const paidOption = document.getElementById('paidOption');
+  const paidInput = document.getElementById('paidInput');
+  const fundingHint = document.getElementById('fundingHint');
   let currentStep = 1;
 
   // Priority range
-  priorityRange?.addEventListener('input', function() { priorityValue.textContent = this.value; });
+  priorityRange?.addEventListener('input', function() { if (priorityValue) priorityValue.textContent = this.value; });
+  priorityRange?.addEventListener('change', function() { if (priorityValue) priorityValue.textContent = this.value; });
 
   function updateStudyFormState() {
     const selected = programSelect?.options[programSelect.selectedIndex];
@@ -252,10 +274,41 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function updateFundingState() {
+    const selected = programSelect?.options[programSelect.selectedIndex];
+    const hasBudget = (parseInt(selected?.dataset.planBudget || '0', 10) || 0) > 0;
+    const hasPaid = (parseInt(selected?.dataset.planPaid || '0', 10) || 0) > 0;
+
+    if (budgetInput) budgetInput.disabled = !hasBudget;
+    if (paidInput) paidInput.disabled = !hasPaid;
+
+    budgetOption?.classList.toggle('disabled', !hasBudget);
+    paidOption?.classList.toggle('disabled', !hasPaid);
+
+    if (budgetInput?.checked && !hasBudget && hasPaid) paidInput.checked = true;
+    if (paidInput?.checked && !hasPaid && hasBudget) budgetInput.checked = true;
+
+    const messages = [];
+    if (selected?.value && !hasBudget) messages.push('бюджет недоступен');
+    if (selected?.value && !hasPaid) messages.push('платное обучение недоступно');
+    if (fundingHint) {
+      fundingHint.textContent = messages.length ? 'Для выбранной программы ' + messages.join(', ') + '.' : '';
+      fundingHint.classList.toggle('hidden', messages.length === 0);
+    }
+
     document.querySelectorAll('.funding-option').forEach(label => {
       const input = label.querySelector('input[name="funding_type"]');
       label.classList.toggle('selected', !!input?.checked);
     });
+
+    const accepting = selected?.dataset.accepting !== '0';
+    if (programHint) {
+      programHint.textContent = selected?.value && !accepting ? 'По выбранной программе приём сейчас закрыт.' : '';
+      programHint.classList.toggle('hidden', !selected?.value || accepting);
+    }
+
+    if (programSelect && step1Next) {
+      step1Next.disabled = !programSelect.value || !accepting || (!hasBudget && !hasPaid);
+    }
   }
 
   document.querySelectorAll('input[name="funding_type"]').forEach(input => {
@@ -266,6 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
   programSelect?.addEventListener('change', function() {
     step1Next.disabled = !this.value;
     updateStudyFormState();
+    updateFundingState();
     if (this.value) {
       const opt = this.options[this.selectedIndex];
       try {
@@ -284,8 +338,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Benefit toggle
   benefitCheck?.addEventListener('change', function() {
     benefitType.disabled = !this.checked;
+    benefitType.required = this.checked;
     benefitType.classList.toggle('opacity-50', !this.checked);
     benefitType.classList.toggle('bg-gray-50', !this.checked);
+    if (this.checked && !benefitType.value) benefitType.value = benefitType.options[0]?.value || '';
+    if (!this.checked) benefitType.value = '';
   });
 
   // Confirm checkbox
