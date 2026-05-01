@@ -1,10 +1,10 @@
 @extends('layouts.app')
-@section('title', 'Редактировать заявление | Портал приёмной комиссии')
+@section('title', 'Редактировать заявление | Приёмная комиссия БНК')
 @section('header', 'Редактирование заявления №' . $application->id)
 @section('sidebar') @include('partials.sidebar-applicant') @endsection
 @section('content')
 <div class="mb-4"><a href="{{ route('applicant.applications.show', $application) }}" class="text-sm text-gray-600 hover:text-gray-900">← Назад к заявлению</a></div>
-<div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">ℹ️ При сохранении номер ревизии будет увеличен (текущая: {{ $application->revision }}), данные профиля обновятся в снапшоте.</div>
+<div class="mb-4 p-3 bg-primary-50 border border-primary-100 rounded-lg text-sm text-primary-700">ℹ️ При сохранении номер ревизии будет увеличен (текущая: {{ $application->revision }}), данные профиля обновятся в снапшоте.</div>
 
 <form method="POST" action="{{ route('applicant.applications.update', $application) }}" enctype="multipart/form-data" class="space-y-6" novalidate>
   @csrf @method('PUT')

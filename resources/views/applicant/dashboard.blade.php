@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Дашборд | Портал приёмной комиссии')
+@section('title', 'Дашборд | Приёмная комиссия БНК')
 @section('header', 'Дашборд абитуриента')
 @section('sidebar') @include('partials.sidebar-applicant') @endsection
 @section('content')
 <div class="mb-6">
   <h2 class="text-xl font-semibold text-gray-900 mb-1">Добро пожаловать, {{ auth()->user()->applicant->first_name ?? 'Абитуриент' }}! 👋</h2>
-  <p class="text-gray-500 text-sm">Приёмная кампания 2024 • Очно / Заочно • Бюджет / Платно</p>
+  <p class="text-gray-500 text-sm">Приёмная комиссия Бугурусланского нефтяного колледжа • 2024 • Очно / Заочно • Бюджет / Платно</p>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -21,7 +21,7 @@
     <p class="mt-2 text-xs text-gray-500">Осталось: <span class="font-medium text-primary-600">{{ 5 - $activeCount }}</span></p>
   </div>
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-600">На проверке</span><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Активно</span></div>
+    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-600">На проверке</span><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-700">Активно</span></div>
     <p class="text-2xl font-bold text-gray-900">{{ $pendingCount }}</p><p class="mt-1 text-xs text-gray-500">Заявлений ожидает решения</p>
   </div>
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">

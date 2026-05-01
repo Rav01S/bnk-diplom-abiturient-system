@@ -78,7 +78,7 @@
               <div class="mt-0.5 text-xs text-gray-500">{{ $staff->full_name ?: 'ФИО не указано' }}</div>
             </td>
             <td class="px-4 py-3">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $staff->role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $staff->role === 'admin' ? 'bg-secondary-100 text-secondary-700' : 'bg-primary-100 text-primary-700' }}">
                 {{ $roleLabels[$staff->role] ?? $staff->role }}
               </span>
             </td>
@@ -116,7 +116,7 @@
           </tr>
 
           @if($editingId === $staff->id)
-            <tr class="bg-blue-50/40">
+            <tr class="bg-primary-50/40">
               <td colspan="6" class="px-4 py-4">
                 <form method="POST" action="{{ route('admin.users.update', $staff) }}" class="grid grid-cols-1 gap-4 lg:grid-cols-5">
                   @csrf

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Заявления | Портал приёмной комиссии')
+@section('title', 'Заявления | Приёмная комиссия БНК')
 @section('header', 'Мои заявления')
 @section('sidebar') @include('partials.sidebar-applicant') @endsection
 @section('content')

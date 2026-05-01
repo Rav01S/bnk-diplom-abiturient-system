@@ -1,14 +1,14 @@
 @extends('layouts.auth')
-@section('title', 'Регистрация | Портал приёмной комиссии')
+@section('title', 'Регистрация | Приёмная комиссия БНК')
 @section('content')
 <div class="w-full max-w-lg">
   <div class="text-center mb-6">
-    <a href="{{ route('login') }}" class="inline-flex items-center text-gray-500 hover:text-gray-900 mb-4">
+    <a href="{{ route('login') }}" class="inline-flex items-center text-primary-100 hover:text-white mb-4">
       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       Назад ко входу
     </a>
-    <h1 class="text-2xl font-bold text-gray-900">Регистрация абитуриента</h1>
-    <p class="text-gray-500 mt-1">Создайте аккаунт для подачи заявлений</p>
+    <h1 class="text-2xl font-bold text-white">Регистрация абитуриента</h1>
+    <p class="text-primary-100 mt-1">Приёмная комиссия Бугурусланского нефтяного колледжа</p>
   </div>
   <div class="bg-white rounded-lg shadow p-6 sm:p-8">
     @if($errors->any())
@@ -35,6 +35,6 @@
     </form>
     <p class="mt-6 text-center text-sm text-gray-600">Уже есть аккаунт? <a href="{{ route('login') }}" class="text-primary-600 hover:text-primary-700 font-medium">Войти</a></p>
   </div>
-  <p class="mt-6 text-center text-xs text-gray-500">© 2024 Портал приёмной комиссии</p>
+  <p class="mt-6 text-center text-xs text-primary-100">© 2024 Бугурусланский нефтяной колледж</p>
 </div>
 @endsection

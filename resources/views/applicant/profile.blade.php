@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Профиль | Портал приёмной комиссии')
+@section('title', 'Профиль | Приёмная комиссия БНК')
 @section('header', 'Мой профиль')
 @section('sidebar') @include('partials.sidebar-applicant') @endsection
 @section('styles') .photo-preview { min-height: 120px; } @endsection

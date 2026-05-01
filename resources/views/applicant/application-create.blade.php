@@ -1,16 +1,16 @@
 @extends('layouts.app')
-@section('title', 'Подать заявление | Портал приёмной комиссии')
+@section('title', 'Подать заявление | Приёмная комиссия БНК')
 @section('header', 'Новое заявление')
 @section('sidebar') @include('partials.sidebar-applicant') @endsection
 @section('styles')
 .wizard-step { display: none; }
 .wizard-step.active { display: block; }
 .step-dot { transition: all 0.2s; }
-.step-dot.active { background-color: #1e3a8a; border-color: #1e3a8a; color: white; }
+.step-dot.active { background-color: #0b5f56; border-color: #0b5f56; color: white; }
 .step-dot.completed { background-color: #059669; border-color: #059669; color: white; }
 .print-preview { font-family: 'Times New Roman', serif; font-size: 14px; line-height: 1.5; }
 .photo-preview { min-height: 120px; }
-.choice-option.selected { border-color: #1e3a8a; background-color: #eff6ff; }
+.choice-option.selected { border-color: #0b5f56; background-color: #edf7f4; }
 .choice-option.disabled { cursor: not-allowed; opacity: 0.55; background-color: #f8fafc; }
 @endsection
 @section('content')
@@ -103,7 +103,7 @@
   {{-- ШАГ 2: Данные (снапшот) --}}
   <div class="wizard-step p-4 sm:p-6" id="step2">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Шаг 2: Данные для заявления</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-primary-50 rounded-lg border border-primary-100">
       <div><label class="block text-xs font-medium text-gray-500 mb-1">Фамилия</label><input type="text" value="{{ $applicant->last_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
       <div><label class="block text-xs font-medium text-gray-500 mb-1">Имя</label><input type="text" value="{{ $applicant->first_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
       <div><label class="block text-xs font-medium text-gray-500 mb-1">Отчество</label><input type="text" value="{{ $applicant->middle_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
@@ -199,7 +199,7 @@
         <p>Заявление №: <strong>будет присвоен после отправки</strong></p>
         <p>Программа: <strong id="summaryProgram">—</strong></p>
         <p>Приоритет: <strong id="summaryPriority">{{ old('priority', 1) }}</strong></p>
-        <p>Статус после отправки: <span class="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">На проверке</span></p>
+        <p>Статус после отправки: <span class="inline-flex rounded-full bg-primary-100 px-2.5 py-1 text-xs font-medium text-primary-700">На проверке</span></p>
       </div>
     </div>
     <div class="mt-8 flex justify-between"><button type="button" id="step4Prev" class="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white rounded-lg">← Назад</button><button type="submit" id="submitBtn" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50" disabled>Отправить заявление</button></div>

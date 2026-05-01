@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@yield('title', 'Портал приёмной комиссии')</title>
+  <title>@yield('title', 'Приёмная комиссия Бугурусланского нефтяного колледжа')</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -12,11 +12,12 @@
         extend: {
           fontFamily: { sans: ['Inter', 'sans-serif'] },
           colors: {
-            primary: { DEFAULT: '#1e3a8a', 50: '#eff6ff', 100: '#dbeafe', 600: '#1e3a8a', 700: '#1d4ed8' },
-            success: { DEFAULT: '#059669', 600: '#047857' },
-            warning: { DEFAULT: '#d97706', 600: '#b45309' },
+            primary: { DEFAULT: '#0b5f56', 50: '#edf7f4', 100: '#d6eee8', 600: '#0b5f56', 700: '#074c45' },
+            secondary: { DEFAULT: '#c74b00', 50: '#fff4ec', 100: '#ffe5d2', 600: '#c74b00', 700: '#a53d00' },
+            success: { DEFAULT: '#4d7c3f', 600: '#3f6833' },
+            warning: { DEFAULT: '#c74b00', 600: '#a53d00' },
             danger: { DEFAULT: '#dc2626', 600: '#b91c1c' },
-            gray: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 700: '#334155', 900: '#0f172a' }
+            gray: { 50: '#f7f8f5', 100: '#ecefeb', 200: '#d8ded8', 300: '#bbc6bf', 500: '#687870', 700: '#31443e', 900: '#162622' }
           },
           borderRadius: { DEFAULT: '0.5rem', lg: '0.5rem' },
           boxShadow: { sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }
@@ -25,10 +26,12 @@
     }
   </script>
   <style>
-    .focus-ring:focus { outline: 2px solid #1e3a8a; outline-offset: 2px; }
+    body { background: linear-gradient(180deg, #edf7f4 0%, #f7f8f5 240px); }
+    .focus-ring:focus { outline: 2px solid #0b5f56; outline-offset: 2px; }
     [aria-required="true"]::after { content: " *"; color: #dc2626; }
-    .sidebar-link.active { background-color: #1e3a8a; color: white; }
+    .sidebar-link.active { background-color: #0b5f56; color: white; }
     .sidebar-link.active svg { color: white; }
+    .sidebar-link:hover { color: #074c45; }
     @yield('styles')
   </style>
 </head>
@@ -36,7 +39,7 @@
   <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" aria-hidden="true"></div>
   <aside id="sidebar" class="fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out">
     <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-      <div class="flex items-center space-x-3">
+      <div class="flex min-w-0 items-center space-x-3">
         <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
           @if(auth()->user()->isAdmin())
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -45,7 +48,7 @@
           @endif
         </div>
         <span class="font-semibold text-gray-900">
-          @if(auth()->user()->isAdmin()) Панель администратора @else Приёмная комиссия @endif
+          @if(auth()->user()->isAdmin()) Панель администратора @else Приёмная комиссия БНК @endif
         </span>
       </div>
       <button id="closeSidebar" class="lg:hidden p-1 text-gray-500 hover:text-gray-700" aria-label="Закрыть меню">
@@ -68,11 +71,11 @@
 
   <div class="lg:ml-64">
     <header class="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
+      <div class="flex min-w-0 items-center space-x-3">
         <button id="burgerBtn" class="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" aria-label="Открыть меню">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <h1 class="text-lg font-semibold text-gray-900">@yield('header')</h1>
+        <h1 class="truncate text-lg font-semibold text-gray-900">@yield('header')</h1>
       </div>
       <div class="flex items-center space-x-2">
         <div class="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-200">

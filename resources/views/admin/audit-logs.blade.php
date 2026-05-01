@@ -52,7 +52,7 @@
               <div class="mt-0.5 text-xs text-gray-500">{{ $log->user?->email ?? '—' }}</div>
             </td>
             <td class="px-4 py-3">
-              <span class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">{{ $log->action }}</span>
+              <span class="inline-flex rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-700">{{ $log->action }}</span>
             </td>
             <td class="px-4 py-3 font-medium text-gray-900">{{ $log->subject ?? '—' }}</td>
             <td class="px-4 py-3 font-mono text-xs text-gray-600">{{ $log->ip_address ?? '—' }}</td>

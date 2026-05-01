@@ -16,10 +16,10 @@
         <td class="px-4 py-3"><div class="font-medium text-gray-900">{{ $s['program']->specialty->full_title }}</div><div class="text-xs text-gray-500">{{ $s['program']->has_study_form ? 'Очная/Заочная' : 'Только очная' }}</div></td>
         <td class="px-4 py-3 text-center font-medium">{{ $s['plan_budget'] }}</td>
         <td class="px-4 py-3 text-center font-bold {{ $s['fact_budget'] >= $s['plan_budget'] ? 'text-green-700' : '' }}">{{ $s['fact_budget'] }}</td>
-        <td class="px-4 py-3 text-center"><div class="w-16 mx-auto"><div class="h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full {{ $pct >= 100 ? 'bg-green-500' : ($pct >= 50 ? 'bg-blue-500' : 'bg-orange-500') }} rounded-full" style="width: {{ min($pct, 100) }}%"></div></div><span class="text-xs text-gray-500">{{ $pct }}%</span></div></td>
+        <td class="px-4 py-3 text-center"><div class="w-16 mx-auto"><div class="h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full {{ $pct >= 100 ? 'bg-green-500' : ($pct >= 50 ? 'bg-primary-600' : 'bg-orange-500') }} rounded-full" style="width: {{ min($pct, 100) }}%"></div></div><span class="text-xs text-gray-500">{{ $pct }}%</span></div></td>
         <td class="px-4 py-3 text-center font-medium">{{ $s['plan_paid'] }}</td>
         <td class="px-4 py-3 text-center font-bold">{{ $s['fact_paid'] }}</td>
-        <td class="px-4 py-3 text-center"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ $s['submitted'] }}</span></td>
+        <td class="px-4 py-3 text-center"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">{{ $s['submitted'] }}</span></td>
       </tr>
       @endforeach
     </tbody></table></div>
