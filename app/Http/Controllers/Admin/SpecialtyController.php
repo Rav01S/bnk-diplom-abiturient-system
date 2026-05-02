@@ -28,7 +28,10 @@ class SpecialtyController extends Controller
             'subject_1' => ['required', 'string', 'max:100'],
             'subject_2' => ['required', 'string', 'max:100'],
             'subject_3' => ['required', 'string', 'max:100'],
+            'is_profession' => ['nullable', 'boolean'],
         ]);
+
+        $validated['is_profession'] = $request->boolean('is_profession');
 
         Specialty::create($validated);
 
@@ -43,7 +46,10 @@ class SpecialtyController extends Controller
             'subject_1' => ['required', 'string', 'max:100'],
             'subject_2' => ['required', 'string', 'max:100'],
             'subject_3' => ['required', 'string', 'max:100'],
+            'is_profession' => ['nullable', 'boolean'],
         ]);
+
+        $validated['is_profession'] = $request->boolean('is_profession');
 
         $specialty->update($validated);
 

@@ -282,34 +282,173 @@ class ApplicationController extends Controller
     /**
      * Скачивание текстового шаблона заявления.
      */
-    public function downloadTemplate(Application $application): StreamedResponse
+    public function downloadTemplate(Application $application)
     {
         $this->authorizeApplicant($application);
         $application->load('program.specialty', 'scores');
 
+        $templatePath = base_path('templates/правила приема, заявление.docx');
+
+        if (!file_exists($templatePath)) {
+            abort(404, 'Шаблон не найден');
+        }
+
+        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
         $specialty = $application->program->specialty;
 
-        return response()->streamDownload(function () use ($application, $specialty): void {
-            $content = "ЗАЯВЛЕНИЕ\n\n";
-            $content .= "От абитуриента: {$application->app_full_name}\n";
-            $content .= "Дата рождения: ".($application->app_birth_date?->format('d.m.Y') ?? '—')."\n";
-            $content .= "Паспорт: {$application->app_passport_series} {$application->app_passport_number}\n";
-            $content .= "Выдан: {$application->app_passport_issued_by}\n";
-            $content .= "СНИЛС: {$application->app_snils}\n\n";
-            $content .= "Прошу зачислить на специальность:\n";
-            $content .= "{$specialty->full_title}\n\n";
-            $content .= "Форма обучения: ".($application->study_form === 'full_time' ? 'Очная' : 'Заочная')."\n";
-            $content .= "Финансирование: ".($application->funding_type === 'budget' ? 'Бюджет' : 'Платное')."\n";
-            $content .= "Приоритет: {$application->priority}\n\n";
-            $content .= "Оценки в аттестате:\n";
-            foreach ($application->scores as $score) {
-                $content .= "  {$score->subject_name}: {$score->score}\n";
-            }
-            $content .= "\n\nДата: ____________  Подпись: ____________\n";
-            echo $content;
-        }, "zayavlenie_{$application->id}.txt", [
-            'Content-Type' => 'text/plain; charset=utf-8',
-        ]);
+        $templateProcessor->setValue('last_name', $application->app_last_name ?? '');
+        $templateProcessor->setValue('first_name', $application->app_first_name ?? '');
+        $templateProcessor->setValue('middle_name', $application->app_middle_name ?? '');
+        
+        $birthDate = $application->app_birth_date ? $application->app_birth_date->format('d.m.Y') : '';
+        $templateProcessor->setValue('birth_date', $birthDate);
+        
+        $templateProcessor->setValue('document_type', 'Паспорт гражданина РФ');
+        $templateProcessor->setValue('passport_series', $application->app_passport_series ?? '');
+        $templateProcessor->setValue('passport_number', $application->app_passport_number ?? '');
+        $templateProcessor->setValue('passport_issued_by', $application->app_passport_issued_by ?? '');
+        $templateProcessor->setValue('snils', $application->app_snils ?? '');
+        
+        if ($specialty && $specialty->is_profession) {
+            $templateProcessor->setValue('is_profession', '☑');
+            $templateProcessor->setValue('is_specialnost', '☐');
+            $templateProcessor->setValue('profession_code', $specialty->code ?? '');
+            $templateProcessor->setValue('profession_name', $specialty->name ?? '');
+            $templateProcessor->setValue('speciality_code', '');
+            $templateProcessor->setValue('speciality_name', '');
+        } else {
+            $templateProcessor->setValue('is_profession', '☐');
+            $templateProcessor->setValue('is_specialnost', '☑');
+            $templateProcessor->setValue('profession_code', '');
+            $templateProcessor->setValue('profession_name', '');
+            $templateProcessor->setValue('speciality_code', $specialty->code ?? '');
+            $templateProcessor->setValue('speciality_name', $specialty->name ?? '');
+        }
+        
+        $templateProcessor->setValue('is_ochnaya', $application->study_form === 'full_time' ? '☑' : '☐');
+        $templateProcessor->setValue('is_zaochnaya', $application->study_form === 'part_time' ? '☑' : '☐');
+        
+        $templateProcessor->setValue('is_budget', $application->funding_type === 'budget' ? '☑' : '☐');
+        $templateProcessor->setValue('is_platno', $application->funding_type === 'paid' ? '☑' : '☐');
+        
+        $prevEdu = $application->app_prev_education;
+        $templateProcessor->setValue('is_osnovnoe_objee_obrazovanie', $prevEdu === '9class' ? '☑' : '☐');
+        $templateProcessor->setValue('is_srednee_objee_obrazovanie', $prevEdu === '11class' ? '☑' : '☐');
+        $templateProcessor->setValue('is_srednee_profesionalnoe_obrazovanie', $prevEdu === 'spo' ? '☑' : '☐');
+        $templateProcessor->setValue('is_vishee_obrazovanie', $prevEdu === 'vo' ? '☑' : '☐');
+        
+        $templateProcessor->setValue('edu_doc_series', $application->app_edu_doc_series ?? '');
+        $templateProcessor->setValue('edu_doc_number', $application->app_edu_doc_number ?? '');
+        
+        $eduIssueDate = $application->app_edu_issue_date ? $application->app_edu_issue_date->format('d.m.Y') : '';
+        $templateProcessor->setValue('edu_issue_date', $eduIssueDate);
+        $templateProcessor->setValue('edu_doc_issued_by', $application->app_edu_doc_issued_by ?? '');
+        
+        $templateProcessor->setValue('is_have_lgota', $application->is_benefit ? '☑' : '☐');
+        $templateProcessor->setValue('is_needed_v_objejitii', $application->needs_dorm ? '☑' : '☐');
+        $templateProcessor->setValue('is_not_needed_v_objejitii', !$application->needs_dorm ? '☑' : '☐');
+        
+        $templateProcessor->setValue('is_first_education', $application->is_first_spo ? '☑' : '☐');
+        $templateProcessor->setValue('is_not_first_education', !$application->is_first_spo ? '☑' : '☐');
+
+        $fileName = "zayavlenie_{$application->id}.docx";
+        $tempPath = storage_path('app/public/' . $fileName);
+        $templateProcessor->saveAs($tempPath);
+
+        return response()->download($tempPath)->deleteFileAfterSend(true);
+    }
+
+    public function downloadDraftTemplate(Request $request)
+    {
+        $applicant = auth()->user()->applicant;
+        $templatePath = base_path('templates/правила приема, заявление.docx');
+
+        if (!file_exists($templatePath)) {
+            abort(404, 'Шаблон не найден');
+        }
+
+        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
+        $program = \App\Models\Program::with('specialty')->find($request->input('program_id'));
+        $specialty = $program ? $program->specialty : null;
+
+        $templateProcessor->setValue('last_name', $applicant->last_name ?? '');
+        $templateProcessor->setValue('first_name', $applicant->first_name ?? '');
+        $templateProcessor->setValue('middle_name', $applicant->middle_name ?? '');
+        
+        $birthDate = $applicant->birth_date ? $applicant->birth_date->format('d.m.Y') : '';
+        $templateProcessor->setValue('birth_date', $birthDate);
+        
+        $templateProcessor->setValue('document_type', 'Паспорт гражданина РФ');
+        $templateProcessor->setValue('passport_series', $applicant->passport_series ?? '');
+        $templateProcessor->setValue('passport_number', $applicant->passport_number ?? '');
+        $templateProcessor->setValue('passport_issued_by', $applicant->passport_issued_by ?? '');
+        $templateProcessor->setValue('snils', $applicant->snils ?? '');
+        
+        if ($specialty && $specialty->is_profession) {
+            $templateProcessor->setValue('is_profession', '☑');
+            $templateProcessor->setValue('is_specialnost', '☐');
+            $templateProcessor->setValue('profession_code', $specialty->code ?? '');
+            $templateProcessor->setValue('profession_name', $specialty->name ?? '');
+            $templateProcessor->setValue('speciality_code', '');
+            $templateProcessor->setValue('speciality_name', '');
+        } else {
+            $templateProcessor->setValue('is_profession', '☐');
+            $templateProcessor->setValue('is_specialnost', '☑');
+            $templateProcessor->setValue('profession_code', '');
+            $templateProcessor->setValue('profession_name', '');
+            $templateProcessor->setValue('speciality_code', $specialty->code ?? '');
+            $templateProcessor->setValue('speciality_name', $specialty->name ?? '');
+        }
+        
+        $studyForm = $request->input('study_form');
+        $templateProcessor->setValue('is_ochnaya', $studyForm === 'full_time' ? '☑' : '☐');
+        $templateProcessor->setValue('is_zaochnaya', $studyForm === 'part_time' ? '☑' : '☐');
+        
+        $fundingType = $request->input('funding_type');
+        $templateProcessor->setValue('is_budget', $fundingType === 'budget' ? '☑' : '☐');
+        $templateProcessor->setValue('is_platno', $fundingType === 'paid' ? '☑' : '☐');
+        
+        $prevEdu = $applicant->prev_education;
+        $templateProcessor->setValue('is_osnovnoe_objee_obrazovanie', $prevEdu === '9class' ? '☑' : '☐');
+        $templateProcessor->setValue('is_srednee_objee_obrazovanie', $prevEdu === '11class' ? '☑' : '☐');
+        $templateProcessor->setValue('is_srednee_profesionalnoe_obrazovanie', $prevEdu === 'spo' ? '☑' : '☐');
+        $templateProcessor->setValue('is_vishee_obrazovanie', $prevEdu === 'vo' ? '☑' : '☐');
+        
+        $templateProcessor->setValue('edu_doc_series', $applicant->edu_doc_series ?? '');
+        $templateProcessor->setValue('edu_doc_number', $applicant->edu_doc_number ?? '');
+        
+        $eduIssueDate = $applicant->edu_issue_date ? $applicant->edu_issue_date->format('d.m.Y') : '';
+        $templateProcessor->setValue('edu_issue_date', $eduIssueDate);
+        $templateProcessor->setValue('edu_doc_issued_by', $applicant->edu_doc_issued_by ?? '');
+        
+        $isBenefit = $request->boolean('is_benefit');
+        $templateProcessor->setValue('is_have_lgota', $isBenefit ? '☑' : '☐');
+        
+        $needsDorm = $request->boolean('needs_dorm');
+        $templateProcessor->setValue('is_needed_v_objejitii', $needsDorm ? '☑' : '☐');
+        $templateProcessor->setValue('is_not_needed_v_objejitii', !$needsDorm ? '☑' : '☐');
+        $templateProcessor->setValue(' is_not_needed_v_objejitii ', !$needsDorm ? '☑' : '☐');
+        
+        $isFirstSpo = $request->boolean('is_first_spo');
+        $templateProcessor->setValue('is_first_education', $isFirstSpo ? '☑' : '☐');
+        $templateProcessor->setValue('is_not_first_education', !$isFirstSpo ? '☑' : '☐');
+
+        $fileName = "zayavlenie_draft_" . auth()->id() . ".docx";
+        $tempPath = storage_path('app/public/' . $fileName);
+        $templateProcessor->saveAs($tempPath);
+
+        return response()->download($tempPath)->deleteFileAfterSend(true);
+    }
+
+    public function downloadEmptyTemplate()
+    {
+        $templatePath = base_path('templates/правила приема, заявление пустое.docx');
+
+        if (!file_exists($templatePath)) {
+            abort(404, 'Пустой шаблон не найден');
+        }
+
+        return response()->download($templatePath, 'Заявление (пустой бланк).docx');
     }
 
     /**

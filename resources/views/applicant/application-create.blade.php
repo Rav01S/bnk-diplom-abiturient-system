@@ -191,7 +191,10 @@
         <p><strong>Оценки в аттестате:</strong><br><span id="previewScores"></span></p>
       </div>
     </div>
-    <div class="flex flex-wrap gap-3 mb-6"><button type="button" id="downloadTemplateBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">📄 Скачать шаблон</button><button type="button" onclick="window.print()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">🖨 Печать</button></div>
+    <div class="flex flex-wrap gap-3 mb-6">
+      <button type="button" id="downloadTemplateBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">📄 Скачать заполненный шаблон</button>
+      <a href="{{ route('applicant.applications.empty-template') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 flex items-center">📄 Скачать пустой бланк</a>
+    </div>
     <div class="mt-8 flex justify-between"><button type="button" id="step3Prev" class="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white rounded-lg">← Назад</button><button type="button" id="step3Next" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg">Далее →</button></div>
   </div>
 
@@ -425,21 +428,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Download template
   document.getElementById('downloadTemplateBtn')?.addEventListener('click', function() {
-    const fio = document.getElementById('previewFio')?.textContent || '';
-    const passport = document.getElementById('previewPassport')?.textContent || '';
-    const snils = document.getElementById('previewSnils')?.textContent || '';
-    const program = document.getElementById('previewProgram')?.textContent || '';
-    const scores = document.getElementById('previewScores')?.innerText || '';
-    const selectedForm = document.querySelector('input[name="study_form"]:checked')?.value;
-    const form = selectedForm === 'part_time' ? 'Заочная' : 'Очная';
-    const selectedFunding = document.querySelector('input[name="funding_type"]:checked')?.value;
-    const funding = selectedFunding === 'paid' ? 'Платное' : 'Бюджет';
-    const content = 'ЗАЯВЛЕНИЕ\n\nОт абитуриента: ' + fio + '\nПаспорт: ' + passport + '\nСНИЛС: ' + snils + '\n\nПрошу зачислить на специальность:\n' + program + '\n\nФорма обучения: ' + form + '\nФинансирование: ' + funding + '\n\nОценки в аттестате:\n' + scores + '\n\nДата: ____________  Подпись: ____________\n';
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'zayavlenie.txt'; a.click();
-    URL.revokeObjectURL(url);
+    const form = document.getElementById('wizardForm');
+    const oldAction = form.action;
+    const oldTarget = form.target;
+    
+    // Set to new route
+    form.action = "{{ route('applicant.applications.draft-template') }}";
+    form.target = "_blank";
+    
+    // Temporarily remove required from signed_doc_photo because it's not needed for template download
+    const photoInput = document.getElementById('signedDocPhoto');
+    const oldRequired = photoInput ? photoInput.required : false;
+    if (photoInput) photoInput.required = false;
+
+    // Remove required from confirm checkbox
+    const confirmInput = document.getElementById('confirmSubmit');
+    let confirmRequired = false;
+    if (confirmInput) {
+       confirmRequired = confirmInput.required;
+       confirmInput.required = false;
+    }
+    
+    form.submit();
+    
+    // Revert
+    setTimeout(() => {
+        form.action = oldAction;
+        form.target = oldTarget;
+        if (photoInput) photoInput.required = oldRequired;
+        if (confirmInput) confirmInput.required = confirmRequired;
+    }, 100);
   });
 
   // Trigger initial state

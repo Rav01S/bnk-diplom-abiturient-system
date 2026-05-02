@@ -14,6 +14,7 @@ class Specialty extends Model
     protected $fillable = [
         'code',
         'name',
+        'is_profession',
         'subject_1',
         'subject_2',
         'subject_3',
@@ -40,5 +41,13 @@ class Specialty extends Model
     public function getFullTitleAttribute(): string
     {
         return "{$this->code} — {$this->name}";
+    }
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'is_profession' => 'boolean',
+        ];
     }
 }

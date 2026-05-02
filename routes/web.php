@@ -53,11 +53,13 @@ Route::prefix('applicant')->middleware(['auth', 'role:applicant'])->name('applic
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications');
     Route::get('/applications/create', [ApplicationController::class, 'create'])->name('applications.create');
     Route::post('/applications', [ApplicationController::class, 'store'])->name('applications.store');
+    Route::get('/applications/empty-template', [ApplicationController::class, 'downloadEmptyTemplate'])->name('applications.empty-template');
     Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
     Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
     Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
     Route::patch('/applications/{application}/cancel', [ApplicationController::class, 'cancel'])->name('applications.cancel');
     Route::get('/applications/{application}/template', [ApplicationController::class, 'downloadTemplate'])->name('applications.template');
+    Route::post('/applications/draft-template', [ApplicationController::class, 'downloadDraftTemplate'])->name('applications.draft-template');
 });
 
 // === Комиссия ===
