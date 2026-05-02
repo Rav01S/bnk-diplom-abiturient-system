@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-6 flex items-center justify-between">
   <div><h2 class="text-xl font-semibold text-gray-900">Статистика приёмной кампании</h2><p class="text-gray-500 text-sm">Данные по всем программам</p></div>
-  <a href="{{ route('commission.stats.export') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">📥 Экспорт CSV</a>
+  <a href="{{ route('commission.stats.export') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">📥 Экспорт Excel</a>
 </div>
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
   <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">%</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (платно)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (платно)</th><th class="px-4 py-3 text-center font-medium text-gray-500">На проверке</th></tr></thead>

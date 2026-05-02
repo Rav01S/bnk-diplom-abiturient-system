@@ -51,28 +51,50 @@ class RankingController extends Controller
             ->sortByDesc(fn ($app) => $app->average_score)
             ->values();
 
-        return response()->streamDownload(function () use ($applications): void {
-            $handle = fopen('php://output', 'w');
-            // BOM для корректного отображения кириллицы в Excel
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['Место', 'ФИО', 'Балл 1', 'Балл 2', 'Балл 3', 'Средний балл', 'Приоритет'], ';');
+        return response()->streamDownload(function () use ($applications, $programId): void {
+            $templatePath = base_path('templates/Ранжирование.xlsx');
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+            $sheet = $spreadsheet->getActiveSheet();
 
-            foreach ($applications as $index => $app) {
-                $scores = $app->scores->pluck('score')->toArray();
-                fputcsv($handle, [
-                    $index + 1,
-                    $app->app_full_name,
-                    $scores[0] ?? '—',
-                    $scores[1] ?? '—',
-                    $scores[2] ?? '—',
-                    number_format($app->average_score, 2, ',', ''),
-                    $app->priority,
-                ], ';');
+            if ($applications->isNotEmpty()) {
+                $program = $applications->first()->program;
+                $sheet->setCellValue('A1', $program->specialty->code . ' ' . $program->specialty->name);
+            } else if ($programId) {
+                $program = Program::with('specialty')->find($programId);
+                if ($program) {
+                    $sheet->setCellValue('A1', $program->specialty->code . ' ' . $program->specialty->name);
+                }
             }
 
-            fclose($handle);
-        }, 'ranking_'.date('Y-m-d').'.csv', [
-            'Content-Type' => 'text/csv; charset=utf-8',
+            $row = 3;
+            foreach ($applications as $index => $app) {
+                $sheet->setCellValue('A' . $row, $index + 1);
+                $sheet->setCellValue('B' . $row, $app->app_full_name);
+                $sheet->setCellValue('C' . $row, $app->app_birth_date ? $app->app_birth_date->format('d.m.Y') : '');
+                $sheet->setCellValue('D' . $row, $app->funding_type === 'budget' ? '+' : ''); // Б/Ж
+                $sheet->setCellValue('E' . $row, $app->funding_type === 'paid' ? '+' : ''); // Х/Р
+                $sheet->setCellValue('F' . $row, $app->app_avg_cert_score ? number_format($app->app_avg_cert_score, 2, ',', '') : '');
+                $sheet->setCellValue('G' . $row, number_format($app->average_score, 2, ',', ''));
+                $sheet->setCellValue('H' . $row, $app->doc_type === 'original' ? 'Оригинал' : 'Копия');
+                
+                // Другие специальности
+                $otherApps = Application::with('program.specialty')
+                    ->where('applicant_id', $app->applicant_id)
+                    ->where('id', '!=', $app->id)
+                    ->get()
+                    ->map(fn($otherApp) => $otherApp->program->specialty->code)
+                    ->implode(', ');
+                $sheet->setCellValue('I' . $row, $otherApps);
+                
+                $sheet->setCellValue('J' . $row, $app->app_phone);
+                $sheet->setCellValue('K' . $row, $app->needs_dorm ? 'Да' : 'Нет');
+                $row++;
+            }
+
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save('php://output');
+        }, 'Ранжирование_'.date('Y-m-d').'.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 }

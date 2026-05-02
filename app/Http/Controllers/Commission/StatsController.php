@@ -48,28 +48,47 @@ class StatsController extends Controller
         $programs = Program::with('specialty')->get();
 
         return response()->streamDownload(function () use ($programs): void {
-            $handle = fopen('php://output', 'w');
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['Специальность', 'План (бюджет)', 'Факт (бюджет)', 'План (платно)', 'Факт (платно)', 'На проверке'], ';');
+            $templatePath = base_path('templates/Статистика за год на данный момент.xlsx');
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templatePath);
+            $sheet = $spreadsheet->getActiveSheet();
 
+            $months = [
+                1 => 'января', 2 => 'февраля', 3 => 'марта', 4 => 'апреля',
+                5 => 'мая', 6 => 'июня', 7 => 'июля', 8 => 'августа',
+                9 => 'сентября', 10 => 'октября', 11 => 'ноября', 12 => 'декабря'
+            ];
+            $currentMonth = $months[(int)date('n')];
+            $sheet->setCellValue('A2', 'на "' . date('d') . '" ' . $currentMonth . ' ' . date('Y') . ' года');
+
+            $row = 5;
             foreach ($programs as $program) {
                 $budgetApproved = Application::where('program_id', $program->id)->where('funding_type', 'budget')->byStatus('approved')->count();
                 $paidApproved = Application::where('program_id', $program->id)->where('funding_type', 'paid')->byStatus('approved')->count();
-                $submitted = Application::where('program_id', $program->id)->byStatus('submitted')->count();
 
-                fputcsv($handle, [
-                    $program->specialty->full_title,
-                    $program->plan_count,
-                    $budgetApproved,
-                    $program->plan_count_paid,
-                    $paidApproved,
-                    $submitted,
-                ], ';');
+                $sheet->setCellValue('A' . $row, $program->specialty->code);
+                $sheet->setCellValue('B' . $row, $program->specialty->name);
+                $sheet->setCellValue('C' . $row, $program->plan_count);
+                $sheet->setCellValue('D' . $row, $budgetApproved);
+                $sheet->setCellValue('E' . $row, $program->plan_count_paid);
+                $sheet->setCellValue('F' . $row, $paidApproved);
+                $row++;
             }
 
-            fclose($handle);
-        }, 'stats_'.date('Y-m-d').'.csv', [
-            'Content-Type' => 'text/csv; charset=utf-8',
+            if ($row > 5) {
+                $styleArray = [
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        ],
+                    ],
+                ];
+                $sheet->getStyle('A5:F' . ($row - 1))->applyFromArray($styleArray);
+            }
+
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save('php://output');
+        }, 'статистика_'.date('Y-m-d').'.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 }
