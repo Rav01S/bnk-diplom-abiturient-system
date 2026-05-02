@@ -3,7 +3,7 @@
 @section('header', 'Приёмная комиссия Бугурусланского нефтяного колледжа')
 @section('sidebar') @include('partials.sidebar-commission') @endsection
 @section('content')
-<div class="mb-6"><h2 class="text-xl font-semibold text-gray-900">Рабочий стол</h2><p class="text-gray-500 text-sm">Приёмная комиссия Бугурусланского нефтяного колледжа • кампания 2024</p></div>
+<div class="mb-6"><h2 class="text-xl font-semibold text-gray-900">Рабочий стол</h2><p class="text-gray-500 text-sm">Приёмная комиссия Бугурусланского нефтяного колледжа • кампания {{ date('Y') }}</p></div>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4"><div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-600">На проверке</span><span class="text-primary-600 bg-primary-50 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span></div><p class="text-2xl font-bold">{{ $pendingCount }}</p><p class="text-xs text-gray-500">Ожидают решения</p></div>
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4"><div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-600">Подтверждено сегодня</span><span class="text-green-600 bg-green-50 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span></div><p class="text-2xl font-bold text-green-700">{{ $approvedToday }}</p><p class="text-xs text-gray-500">За смену</p></div>
@@ -20,6 +20,6 @@
       <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">Нет заявлений</td></tr>
       @endforelse
     </tbody></table></div>
-  <a href="{{ route('commission.queue') }}" class="inline-block mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium">Перейти в полную очередь →</a>
+  <a href="{{ route('commission.queue') }}" class="inline-block mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium">Перейти ко всем заявлениям →</a>
 </div>
 @endsection

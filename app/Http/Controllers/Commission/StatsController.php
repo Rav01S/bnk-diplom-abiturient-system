@@ -10,9 +10,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StatsController extends Controller
 {
-    public function index(): View
+    public function index(\Illuminate\Http\Request $request): View
     {
-        $programs = Program::with('specialty')->get();
+        $year = $request->input('campaign_year', date('Y'));
+        $programs = Program::with('specialty')
+            ->where('campaign_year', $year)
+            ->get();
 
         $stats = $programs->map(function (Program $program) {
             $budgetApproved = Application::where('program_id', $program->id)
@@ -37,15 +40,18 @@ class StatsController extends Controller
             ];
         });
 
-        return view('commission.stats', compact('stats'));
+        return view('commission.stats', compact('stats', 'year'));
     }
 
     /**
-     * Экспорт статистики план/факт в CSV.
+     * Экспорт статистики план/факт в Excel.
      */
-    public function export(): StreamedResponse
+    public function export(\Illuminate\Http\Request $request): StreamedResponse
     {
-        $programs = Program::with('specialty')->get();
+        $year = $request->input('campaign_year', date('Y'));
+        $programs = Program::with('specialty')
+            ->where('campaign_year', $year)
+            ->get();
 
         return response()->streamDownload(function () use ($programs): void {
             $templatePath = base_path('templates/Статистика за год на данный момент.xlsx');

@@ -13,8 +13,11 @@ class QueueController extends Controller
     public function index(Request $request): View
     {
         $query = Application::with('program.specialty')
-            ->byStatus('submitted')
-            ->latest();
+            ->whereNotIn('status', ['draft', 'cancelled']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -28,7 +31,7 @@ class QueueController extends Controller
             });
         }
 
-        $applications = $query->paginate(15);
+        $applications = $query->orderBy('id', 'desc')->paginate(20);
 
         return view('commission.queue', compact('applications'));
     }

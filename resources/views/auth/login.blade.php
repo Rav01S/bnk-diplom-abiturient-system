@@ -55,6 +55,6 @@
       </div>
     </div>
   </div>
-  <p class="mt-6 text-center text-xs text-primary-100">© 2024 Бугурусланский нефтяной колледж</p>
+  <p class="mt-6 text-center text-xs text-primary-100">© {{ date('Y') }} Бугурусланский нефтяной колледж</p>
 </div>
 @endsection

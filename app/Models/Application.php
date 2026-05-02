@@ -135,7 +135,15 @@ class Application extends Model
      */
     public function isCancellable(): bool
     {
-        return in_array($this->status, ['draft', 'submitted']);
+        return in_array($this->status, ['draft', 'submitted', 'accepted']);
+    }
+
+    /**
+     * Можно ли удалить заявление.
+     */
+    public function isDeletable(): bool
+    {
+        return true;
     }
 
     /**

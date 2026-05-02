@@ -6,7 +6,11 @@
 <div class="mb-6"><h2 class="text-xl font-semibold text-gray-900">Рейтинговые списки</h2><p class="text-gray-500 text-sm">Одобренные заявления, отсортированные по среднему баллу трёх предметов</p></div>
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
   <form method="GET" class="flex flex-wrap gap-3 items-end">
-    <div class="flex-1 min-w-[200px]"><label class="block text-xs font-medium text-gray-500 mb-1">Программа</label><select name="program_id" onchange="this.form.submit()" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">@foreach($programs as $p)<option value="{{ $p->id }}" {{ $selectedProgramId == $p->id ? 'selected' : '' }}>{{ $p->specialty->full_title }}</option>@endforeach</select></div>
+    <div class="w-24"><label class="block text-xs font-medium text-gray-500 mb-1">Год</label><input type="number" name="campaign_year" value="{{ $year }}" onchange="this.form.submit()" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"></div>
+    <div class="flex-1 min-w-[200px]"><label class="block text-xs font-medium text-gray-500 mb-1">Программа</label><select name="program_id" onchange="this.form.submit()" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
+      @if($programs->isEmpty())<option disabled>Нет программ на {{ $year }} год</option>@endif
+      @foreach($programs as $p)<option value="{{ $p->id }}" {{ $selectedProgramId == $p->id ? 'selected' : '' }}>{{ $p->specialty->full_title }}</option>@endforeach
+    </select></div>
     <div><label class="block text-xs font-medium text-gray-500 mb-1">Финансирование</label><select name="funding_type" onchange="this.form.submit()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"><option value="budget" {{ $fundingType==='budget' ? 'selected' : '' }}>Бюджет</option><option value="paid" {{ $fundingType==='paid' ? 'selected' : '' }}>Платно</option></select></div>
     @if($selectedProgramId)<a href="{{ route('commission.ranking.export', ['program_id'=>$selectedProgramId, 'funding_type'=>$fundingType]) }}" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">📥 Excel</a>@endif
   </form>

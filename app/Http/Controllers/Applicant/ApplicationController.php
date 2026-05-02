@@ -77,8 +77,12 @@ class ApplicationController extends Controller
             ]);
         }
 
-        // Все созданные программы показываем в списке, недоступные помечаются в интерфейсе.
-        $programs = Program::with('specialty')->where('is_open', true)->get();
+        // Показываем только самые свежие программы для каждой специальности.
+        $programs = Program::with('specialty')
+            ->where('is_open', true)
+            ->get()
+            ->groupBy('specialty_id')
+            ->map(fn($group) => $group->sortByDesc('campaign_year')->first());
         $specialtiesWithoutPrograms = Specialty::doesntHave('programs')->get();
         $occupiedPriorities = $applicant->applications()->active()->pluck('priority')->all();
         $maxSelectablePriority = min($activeCount + 1, 5);
@@ -129,6 +133,21 @@ class ApplicationController extends Controller
 
         if ($validated['funding_type'] === 'paid' && $program->plan_count_paid <= 0) {
             return back()->withErrors(['funding_type' => 'Для выбранной программы нет платных мест.']);
+        }
+
+        // Проверка на дубликат: та же специальность, форма обучения и тип финансирования
+        $studyForm = $program->has_study_form ? $validated['study_form'] : 'full_time';
+        $existingDuplicate = $applicant->applications()
+            ->where('status', '!=', 'cancelled')
+            ->whereHas('program', function($query) use ($program) {
+                $query->where('specialty_id', $program->specialty_id);
+            })
+            ->where('study_form', $studyForm)
+            ->where('funding_type', $validated['funding_type'])
+            ->exists();
+
+        if ($existingDuplicate) {
+            return back()->withErrors(['program_id' => 'У вас уже есть активное заявление или черновик на эту специальность с такими же условиями обучения и финансирования.']);
         }
 
         $application = DB::transaction(function () use ($applicant, $validated, $program, $request): Application {
@@ -214,6 +233,23 @@ class ApplicationController extends Controller
 
         $validated = $request->validated();
         $applicant = auth()->user()->applicant;
+        $program = Program::findOrFail($validated['program_id']);
+
+        // Проверка на дубликат при обновлении
+        $studyForm = $program->has_study_form ? $validated['study_form'] : 'full_time';
+        $existingDuplicate = $applicant->applications()
+            ->whereKeyNot($application->id)
+            ->where('status', '!=', 'cancelled')
+            ->whereHas('program', function($query) use ($program) {
+                $query->where('specialty_id', $program->specialty_id);
+            })
+            ->where('study_form', $studyForm)
+            ->where('funding_type', $validated['funding_type'])
+            ->exists();
+
+        if ($existingDuplicate) {
+            return back()->withErrors(['program_id' => 'У вас уже есть другое активное заявление или черновик на эту специальность с такими же условиями обучения и финансирования.']);
+        }
 
         DB::transaction(function () use ($application, $validated, $applicant, $request): void {
             $application->priority = $validated['priority'];
@@ -491,5 +527,23 @@ class ApplicationController extends Controller
             $target->priority = $desiredPriority;
             $target->save();
         }
+    }
+
+    /**
+     * Удаление заявления.
+     */
+    public function destroy(Application $application): RedirectResponse
+    {
+        $this->authorizeApplicant($application);
+
+        if (! $application->isDeletable()) {
+            return back()->withErrors(['delete' => 'Заявление не может быть удалено.']);
+        }
+
+        $application->scores()->delete();
+        $application->delete();
+
+        return redirect()->route('applicant.applications')
+            ->with('success', 'Заявление удалено.');
     }
 }

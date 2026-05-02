@@ -13,15 +13,26 @@ class RankingController extends Controller
 {
     public function index(Request $request): View
     {
-        $programs = Program::with('specialty')->get();
-        $selectedProgramId = $request->input('program_id', $programs->first()?->id);
+        $year = $request->input('campaign_year', date('Y'));
+        
+        $programs = Program::with('specialty')
+            ->where('campaign_year', $year)
+            ->get();
+            
+        $selectedProgramId = $request->input('program_id');
+        
+        // Если выбранная программа не из этого года или не задана, берем первую доступную за год
+        if (!$selectedProgramId || !$programs->contains('id', $selectedProgramId)) {
+            $selectedProgramId = $programs->first()?->id;
+        }
+        
         $fundingType = $request->input('funding_type', 'budget');
 
         $ranking = collect();
         $selectedProgram = null;
 
         if ($selectedProgramId) {
-            $selectedProgram = Program::with('specialty')->find($selectedProgramId);
+            $selectedProgram = $programs->firstWhere('id', $selectedProgramId);
 
             $ranking = Application::with('scores')
                 ->where('program_id', $selectedProgramId)
@@ -32,7 +43,7 @@ class RankingController extends Controller
                 ->values();
         }
 
-        return view('commission.ranking', compact('programs', 'ranking', 'selectedProgram', 'selectedProgramId', 'fundingType'));
+        return view('commission.ranking', compact('programs', 'ranking', 'selectedProgram', 'selectedProgramId', 'fundingType', 'year'));
     }
 
     /**

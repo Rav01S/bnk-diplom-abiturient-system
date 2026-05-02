@@ -3,9 +3,18 @@
 @section('header', 'Статистика план/факт')
 @section('sidebar') @include('partials.sidebar-commission') @endsection
 @section('content')
-<div class="mb-6 flex items-center justify-between">
-  <div><h2 class="text-xl font-semibold text-gray-900">Статистика приёмной кампании</h2><p class="text-gray-500 text-sm">Данные по всем программам</p></div>
-  <a href="{{ route('commission.stats.export') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">📥 Экспорт Excel</a>
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div><h2 class="text-xl font-semibold text-gray-900">Статистика приёмной кампании</h2><p class="text-gray-500 text-sm">Данные за {{ $year }} год</p></div>
+  <div class="flex items-center gap-3">
+    <form method="GET" class="flex items-center gap-2">
+      <label class="text-xs font-medium text-gray-500">Год:</label>
+      <input type="number" name="campaign_year" value="{{ $year }}" onchange="this.form.submit()" class="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white">
+    </form>
+    <a href="{{ route('commission.stats.export', ['campaign_year' => $year]) }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Экспорт Excel
+    </a>
+  </div>
 </div>
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
   <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">%</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (платно)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (платно)</th><th class="px-4 py-3 text-center font-medium text-gray-500">На проверке</th></tr></thead>

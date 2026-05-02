@@ -58,6 +58,7 @@ Route::prefix('applicant')->middleware(['auth', 'role:applicant'])->name('applic
     Route::get('/applications/{application}/edit', [ApplicationController::class, 'edit'])->name('applications.edit');
     Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
     Route::patch('/applications/{application}/cancel', [ApplicationController::class, 'cancel'])->name('applications.cancel');
+    Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
     Route::get('/applications/{application}/template', [ApplicationController::class, 'downloadTemplate'])->name('applications.template');
     Route::post('/applications/draft-template', [ApplicationController::class, 'downloadDraftTemplate'])->name('applications.draft-template');
 });

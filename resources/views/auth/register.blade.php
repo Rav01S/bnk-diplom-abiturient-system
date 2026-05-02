@@ -35,6 +35,6 @@
     </form>
     <p class="mt-6 text-center text-sm text-gray-600">Уже есть аккаунт? <a href="{{ route('login') }}" class="text-primary-600 hover:text-primary-700 font-medium">Войти</a></p>
   </div>
-  <p class="mt-6 text-center text-xs text-primary-100">© 2024 Бугурусланский нефтяной колледж</p>
+  <p class="mt-6 text-center text-xs text-primary-100">© {{ date('Y') }} Бугурусланский нефтяной колледж</p>
 </div>
 @endsection

@@ -9,6 +9,7 @@ use App\Models\Specialty;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SpecialtyController extends Controller
@@ -86,7 +87,10 @@ class SpecialtyController extends Controller
     public function storeProgram(Request $request, Specialty $specialty): RedirectResponse
     {
         $validated = $request->validate([
-            'campaign_year' => ['required', 'integer', 'min:2020', 'max:2030'],
+            'campaign_year' => [
+                'required', 'integer', 'min:2020', 'max:2030',
+                Rule::unique('programs')->where('specialty_id', $specialty->id)
+            ],
             'has_study_form' => ['nullable', 'boolean'],
             'plan_count' => ['required', 'integer', 'min:0'],
             'plan_count_paid' => ['required', 'integer', 'min:0'],
@@ -106,7 +110,10 @@ class SpecialtyController extends Controller
     public function updateProgram(Request $request, Program $program): RedirectResponse
     {
         $validated = $request->validate([
-            'campaign_year' => ['required', 'integer', 'min:2020', 'max:2030'],
+            'campaign_year' => [
+                'required', 'integer', 'min:2020', 'max:2030',
+                Rule::unique('programs')->where('specialty_id', $program->specialty_id)->ignore($program->id)
+            ],
             'has_study_form' => ['nullable', 'boolean'],
             'plan_count' => ['required', 'integer', 'min:0'],
             'plan_count_paid' => ['required', 'integer', 'min:0'],
