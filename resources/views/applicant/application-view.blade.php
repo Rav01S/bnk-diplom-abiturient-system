@@ -30,6 +30,7 @@
             Нет
           @endif
         </p></div>
+        <div><p class="text-gray-500 text-xs">Общежитие</p><p class="font-medium">{{ $application->needs_dorm ? 'Нуждаюсь' : 'Не нуждаюсь' }}</p></div>
         <div><p class="text-gray-500 text-xs">Ревизия</p><p class="font-medium">{{ $application->revision }}</p></div>
       </div>
     </div>

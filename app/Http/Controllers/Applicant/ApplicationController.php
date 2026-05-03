@@ -383,6 +383,7 @@ class ApplicationController extends Controller
         $templateProcessor->setValue('is_have_lgota', $application->is_benefit ? '☑' : '☐');
         $templateProcessor->setValue('is_needed_v_objejitii', $application->needs_dorm ? '☑' : '☐');
         $templateProcessor->setValue('is_not_needed_v_objejitii', !$application->needs_dorm ? '☑' : '☐');
+        $templateProcessor->setValue(' is_not_needed_v_objejitii ', !$application->needs_dorm ? '☑' : '☐');
         
         $templateProcessor->setValue('is_first_education', $application->is_first_spo ? '☑' : '☐');
         $templateProcessor->setValue('is_not_first_education', !$application->is_first_spo ? '☑' : '☐');
