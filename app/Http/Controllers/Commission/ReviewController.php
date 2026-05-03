@@ -46,7 +46,7 @@ class ReviewController extends Controller
             'rework_needed' => 'Заявление отправлено на доработку.',
         ];
 
-        return redirect()->route('commission.queue')
+        return redirect()->route('commission.queue', $request->query())
             ->with('success', $messages[$validated['decision']]);
     }
 }

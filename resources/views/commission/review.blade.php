@@ -4,7 +4,7 @@
 @section('sidebar') @include('partials.sidebar-commission') @endsection
 @section('styles') .zoom-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:none;align-items:center;justify-content:center}.zoom-overlay.active{display:flex}.zoom-overlay img{max-height:90vh;max-width:90vw;border-radius:8px;} @endsection
 @section('content')
-<div class="mb-4"><a href="{{ route('commission.queue') }}" class="text-sm text-gray-600 hover:text-gray-900">← К очереди</a></div>
+<div class="mb-4"><a href="{{ route('commission.queue', request()->query()) }}" class="text-sm text-gray-600 hover:text-gray-900">← К очереди</a></div>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
   {{-- Левая панель: снапшот + решение --}}
   <div class="lg:col-span-7 bg-white rounded-lg shadow-sm border border-gray-200 overflow-y-auto p-4 sm:p-5">
@@ -38,7 +38,7 @@
       @endforeach
     </div>
 
-    <form method="POST" action="{{ route('commission.review.submit', $application) }}" id="reviewForm">
+    <form method="POST" action="{{ route('commission.review.submit', array_merge(['application' => $application], request()->query())) }}" id="reviewForm">
       @csrf
       <h3 class="font-medium text-gray-900 mb-2">Чек-лист сверки</h3>
       <div class="space-y-2 mb-6">

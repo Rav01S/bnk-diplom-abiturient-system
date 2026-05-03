@@ -122,6 +122,16 @@ class RankingController extends Controller
                 
                 $sheet->setCellValue('J' . $row, $app->app_phone);
                 $sheet->setCellValue('K' . $row, $app->needs_dorm ? 'Да' : 'Нет');
+
+                // Границы для строки
+                $sheet->getStyle('A' . $row . ':K' . $row)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        ],
+                    ],
+                ]);
+
                 $row++;
             }
 

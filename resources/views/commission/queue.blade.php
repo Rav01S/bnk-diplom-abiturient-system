@@ -28,7 +28,7 @@
         <td class="px-4 py-3">@include('partials.status-badge', ['status' => $app->status])</td>
         <td class="px-4 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-xs">{{ $app->revision }}</span></td>
         <td class="px-4 py-3 text-xs text-gray-600">{{ $app->created_at->format('d.m.Y H:i') }}</td>
-        <td class="px-4 py-3 text-right"><a href="{{ route('commission.review', $app) }}" class="inline-flex items-center px-3 py-1.5 bg-primary-600 text-white rounded text-xs font-medium hover:bg-primary-700">Перейти</a></td>
+        <td class="px-4 py-3 text-right"><a href="{{ route('commission.review', array_merge(['application' => $app], request()->query())) }}" class="inline-flex items-center px-3 py-1.5 bg-primary-600 text-white rounded text-xs font-medium hover:bg-primary-700">Перейти</a></td>
       </tr>
       @empty
       <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">Заявлений не найдено</td></tr>
