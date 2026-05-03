@@ -39,7 +39,10 @@ class RankingController extends Controller
                 ->where('funding_type', $fundingType)
                 ->byStatus('approved')
                 ->get()
-                ->sortByDesc(fn ($app) => $app->average_score)
+                ->sortByDesc(fn ($app) => [
+                    $app->is_benefit && $app->benefit_type === 'svo' ? 6.0 : (float) $app->app_avg_cert_score,
+                    $app->average_score
+                ])
                 ->values();
         }
 
@@ -59,7 +62,10 @@ class RankingController extends Controller
             ->where('funding_type', $fundingType)
             ->byStatus('approved')
             ->get()
-            ->sortByDesc(fn ($app) => $app->average_score)
+            ->sortByDesc(fn ($app) => [
+                $app->is_benefit && $app->benefit_type === 'svo' ? 6.0 : (float) $app->app_avg_cert_score,
+                $app->average_score
+            ])
             ->values();
 
         return response()->streamDownload(function () use ($applications, $programId): void {
@@ -80,12 +86,29 @@ class RankingController extends Controller
             $row = 3;
             foreach ($applications as $index => $app) {
                 $sheet->setCellValue('A' . $row, $index + 1);
-                $sheet->setCellValue('B' . $row, $app->app_full_name);
+                
+                // ФИО + Льгота
+                $nameWithBenefit = $app->app_full_name;
+                if ($app->is_benefit && $app->benefit_type) {
+                    $benefitLabel = $app->benefit_type === 'olympiad' ? 'Олимпиада' : ($app->benefit_type === 'disability' ? 'Инвалидность' : ($app->benefit_type === 'svo' ? 'СВО' : $app->benefit_type));
+                    $nameWithBenefit .= ' (' . $benefitLabel . ')';
+                }
+                $sheet->setCellValue('B' . $row, $nameWithBenefit);
+                
                 $sheet->setCellValue('C' . $row, $app->app_birth_date ? $app->app_birth_date->format('d.m.Y') : '');
                 $sheet->setCellValue('D' . $row, $app->funding_type === 'budget' ? '+' : ''); // Б/Ж
                 $sheet->setCellValue('E' . $row, $app->funding_type === 'paid' ? '+' : ''); // Х/Р
-                $sheet->setCellValue('F' . $row, $app->app_avg_cert_score ? number_format($app->app_avg_cert_score, 2, ',', '') : '');
+                
+                // Средний балл аттестата (F)
+                if ($app->is_benefit && $app->benefit_type === 'svo') {
+                    $sheet->setCellValue('F' . $row, '6,00 (' . number_format($app->app_avg_cert_score, 2, ',', '') . ')');
+                } else {
+                    $sheet->setCellValue('F' . $row, $app->app_avg_cert_score ? number_format($app->app_avg_cert_score, 2, ',', '') : '');
+                }
+                
+                // Средний балл по 3 предметам (G)
                 $sheet->setCellValue('G' . $row, number_format($app->average_score, 2, ',', ''));
+                
                 $sheet->setCellValue('H' . $row, $app->doc_type === 'original' ? 'Оригинал' : 'Копия');
                 
                 // Другие специальности

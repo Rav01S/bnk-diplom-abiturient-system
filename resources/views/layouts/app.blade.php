@@ -78,6 +78,11 @@
         <h1 class="truncate text-lg font-semibold text-gray-900">@yield('header')</h1>
       </div>
       <div class="flex items-center space-x-2">
+        @if(!auth()->user()->isApplicant())
+        <a href="{{ route('password.edit') }}" class="p-2 text-gray-500 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition" title="Сменить пароль">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        </a>
+        @endif
         <div class="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-200">
           <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
             <span class="text-sm font-medium text-primary-700">{{ auth()->user()->initials }}</span>

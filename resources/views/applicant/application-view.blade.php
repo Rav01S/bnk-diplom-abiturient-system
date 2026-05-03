@@ -23,6 +23,13 @@
         <div><p class="text-gray-500 text-xs">Специальность</p><p class="font-medium">{{ $application->program->specialty->full_title }}</p></div>
         <div><p class="text-gray-500 text-xs">Форма / Финансирование</p><p class="font-medium">{{ $application->study_form === 'full_time' ? 'Очная' : 'Заочная' }} / {{ $application->funding_type === 'budget' ? 'Бюджет' : 'Платно' }}</p></div>
         <div><p class="text-gray-500 text-xs">Приоритет</p><p class="font-medium">{{ $application->priority }}</p></div>
+        <div><p class="text-gray-500 text-xs">Льгота</p><p class="font-medium">
+          @if($application->is_benefit)
+            {{ $application->benefit_type === 'olympiad' ? 'Олимпиада' : ($application->benefit_type === 'disability' ? 'Инвалидность' : ($application->benefit_type === 'svo' ? 'СВО' : $application->benefit_type)) }}
+          @else
+            Нет
+          @endif
+        </p></div>
         <div><p class="text-gray-500 text-xs">Ревизия</p><p class="font-medium">{{ $application->revision }}</p></div>
       </div>
     </div>

@@ -16,6 +16,19 @@
       <div><p class="text-gray-500 text-xs">СНИЛС</p><p class="font-mono">{{ $application->app_snils }}</p></div>
       <div><p class="text-gray-500 text-xs">Форма обучения</p><p class="font-medium">{{ $application->study_form === 'full_time' ? 'Очная' : 'Заочная' }}</p></div>
       <div><p class="text-gray-500 text-xs">Финансирование</p><p class="font-medium">{{ $application->funding_type === 'budget' ? 'Бюджет' : 'Платное' }}</p></div>
+      <div class="sm:col-span-2 p-2 bg-amber-50 rounded border border-amber-100 flex items-center justify-between">
+        <div><p class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Особые права (Льгота)</p>
+        <p class="font-bold text-gray-900">
+          @if($application->is_benefit)
+            {{ $application->benefit_type === 'olympiad' ? 'Олимпиада' : ($application->benefit_type === 'disability' ? 'Инвалидность' : ($application->benefit_type === 'svo' ? 'СВО' : $application->benefit_type)) }}
+          @else
+            Нет
+          @endif
+        </p></div>
+        @if($application->is_benefit)
+          <span class="px-2 py-1 bg-amber-200 text-amber-800 text-[10px] font-bold rounded uppercase">Требует проверки</span>
+        @endif
+      </div>
     </div>
 
     <h3 class="font-medium text-gray-900 mb-2">Оценки в аттестате (предметы)</h3>

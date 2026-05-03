@@ -6,6 +6,10 @@
 @section('content')
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
   <div><h2 class="text-xl font-semibold text-gray-900">Личные данные</h2><p class="text-gray-500 text-sm">Заполните профиль для автоматического заполнения заявлений</p></div>
+  <a href="{{ route('password.edit') }}" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm transition hover:shadow-md">
+    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+    Сменить пароль
+  </a>
 </div>
 
 <form method="POST" action="{{ route('applicant.profile.update') }}" enctype="multipart/form-data" class="space-y-6" novalidate>
@@ -102,6 +106,20 @@
 @endsection
 @section('scripts')
 <script>
+const form = document.querySelector('form');
+form.addEventListener('submit', function(e) {
+  let totalSize = 0;
+  this.querySelectorAll('input[type="file"]').forEach(input => {
+    if (input.files?.[0]) totalSize += input.files[0].size;
+  });
+  
+  // 8MB limit (approximate, PHP limit is exactly 8388608 bytes)
+  if (totalSize > 8 * 1024 * 1024) {
+    e.preventDefault();
+    alert('Суммарный размер файлов превышает 8 МБ. Пожалуйста, загрузите файлы меньшего размера или загружайте их по отдельности.');
+  }
+});
+
 document.querySelectorAll('input[type="file"][data-preview]').forEach(input => {
   input.addEventListener('change', function(e) {
     const previewId = this.dataset.preview;

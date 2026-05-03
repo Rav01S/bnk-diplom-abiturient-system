@@ -16,5 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
+            return back()->withInput()->withErrors(['error' => 'Суммарный размер загружаемых файлов слишком велик. Пожалуйста, загрузите файлы меньшего размера или по отдельности.']);
+        });
     })->create();

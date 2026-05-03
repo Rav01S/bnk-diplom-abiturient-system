@@ -24,6 +24,7 @@
       <select id="benefitType" name="benefit_type" class="px-3 py-2 border border-gray-300 rounded-lg text-sm {{ old('is_benefit', $application->is_benefit) ? 'bg-white' : 'bg-gray-50 opacity-50' }}" {{ old('is_benefit', $application->is_benefit) ? 'required' : 'disabled' }}>
         <option value="olympiad" {{ old('benefit_type', $application->benefit_type)==='olympiad'?'selected':'' }}>Олимпиада</option>
         <option value="disability" {{ old('benefit_type', $application->benefit_type)==='disability'?'selected':'' }}>Инвалидность</option>
+        <option value="svo" {{ old('benefit_type', $application->benefit_type)==='svo'?'selected':'' }}>СВО</option>
       </select>
       <label class="flex items-center"><input type="hidden" name="needs_dorm" value="0"><input type="checkbox" name="needs_dorm" value="1" {{ old('needs_dorm', $application->needs_dorm) ? 'checked' : '' }} class="w-4 h-4 text-primary-600 rounded mr-2">Общежитие</label>
       <label class="flex items-center"><input type="hidden" name="is_first_spo" value="0"><input type="checkbox" name="is_first_spo" value="1" {{ old('is_first_spo', $application->is_first_spo) ? 'checked' : '' }} class="w-4 h-4 text-primary-600 rounded mr-2">Первое СПО</label>

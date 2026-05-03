@@ -13,13 +13,21 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $users = User::whereIn('role', ['commission', 'admin'])
-            ->orderBy('id')
-            ->get();
+        $tab = $request->query('tab', 'staff');
+        
+        $query = User::orderBy('id');
+        
+        if ($tab === 'applicants') {
+            $query->where('role', 'applicant');
+        } else {
+            $query->whereIn('role', ['commission', 'admin']);
+        }
 
-        return view('admin.users', compact('users'));
+        $users = $query->paginate(20)->withQueryString();
+
+        return view('admin.users', compact('users', 'tab'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -54,12 +62,12 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        $this->ensureStaffAccount($user);
+        $this->ensureManageableUser($user);
 
         $validated = $request->validate([
             'full_name' => ['nullable', 'string', 'max:150'],
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'role' => ['required', Rule::in(['commission', 'admin'])],
+            'role' => ['required', Rule::in(['commission', 'admin', 'applicant'])],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
 
@@ -70,7 +78,7 @@ class UserController extends Controller
         $user->fill([
             'full_name' => $validated['full_name'] ?? null,
             'email' => $validated['email'],
-            'role' => $validated['role'],
+            'role' => $user->role === 'applicant' ? 'applicant' : $validated['role'], // Protect applicant role
         ]);
 
         if (! empty($validated['password'])) {
@@ -79,32 +87,17 @@ class UserController extends Controller
 
         $user->save();
 
-        AuditLog::record($request, 'staff.updated', $user->email, [
-            'staff_id' => $user->id,
+        AuditLog::record($request, 'user.updated', $user->email, [
+            'user_id' => $user->id,
             'role' => $user->role,
         ]);
 
-        return redirect()->route('admin.users')->with('success', 'Данные сотрудника обновлены.');
-    }
-
-    public function resetPassword(Request $request, User $user): RedirectResponse
-    {
-        $this->ensureStaffAccount($user);
-
-        $user->update([
-            'password_hash' => Hash::make('password123'),
-        ]);
-
-        AuditLog::record($request, 'staff.password_reset', $user->email, [
-            'staff_id' => $user->id,
-        ]);
-
-        return redirect()->route('admin.users')->with('success', 'Пароль сброшен на password123.');
+        return redirect()->route('admin.users', ['tab' => $user->role === 'applicant' ? 'applicants' : 'staff'])->with('success', 'Данные пользователя обновлены.');
     }
 
     public function toggle(Request $request, User $user): RedirectResponse
     {
-        $this->ensureStaffAccount($user);
+        $this->ensureManageableUser($user);
 
         if ($user->id === $request->user()?->id) {
             return back()->withErrors(['user' => 'Нельзя деактивировать свою учётную запись.']);
@@ -114,33 +107,36 @@ class UserController extends Controller
             'is_active' => ! ($user->is_active ?? true),
         ]);
 
-        AuditLog::record($request, ($user->is_active ?? true) ? 'staff.activated' : 'staff.deactivated', $user->email, [
-            'staff_id' => $user->id,
+        AuditLog::record($request, ($user->is_active ?? true) ? 'user.activated' : 'user.deactivated', $user->email, [
+            'user_id' => $user->id,
         ]);
 
+        $message = ($user->is_active ?? true) ? 'Пользователь активирован.' : 'Пользователь деактивирован.';
         return redirect()
-            ->route('admin.users')
-            ->with('success', ($user->is_active ?? true) ? 'Сотрудник активирован.' : 'Сотрудник деактивирован.');
+            ->route('admin.users', ['tab' => $user->role === 'applicant' ? 'applicants' : 'staff'])
+            ->with('success', $message);
     }
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
-        $this->ensureStaffAccount($user);
+        $this->ensureManageableUser($user);
 
         if ($user->id === $request->user()?->id) {
             return back()->withErrors(['delete' => 'Невозможно удалить собственный аккаунт.']);
         }
 
         $email = $user->email;
+        $tab = $user->role === 'applicant' ? 'applicants' : 'staff';
         $user->delete();
 
-        AuditLog::record($request, 'staff.deleted', $email);
+        AuditLog::record($request, 'user.deleted', $email);
 
-        return redirect()->route('admin.users')->with('success', 'Пользователь удалён.');
+        return redirect()->route('admin.users', ['tab' => $tab])->with('success', 'Пользователь удалён.');
     }
 
-    private function ensureStaffAccount(User $user): void
+    private function ensureManageableUser(User $user): void
     {
-        abort_unless(in_array($user->role, ['commission', 'admin'], true), 404);
+        // Allowed to manage any user from admin panel
+        return;
     }
 }

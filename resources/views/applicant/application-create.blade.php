@@ -165,6 +165,7 @@
             <select id="benefitType" name="benefit_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm {{ old('is_benefit') ? 'bg-white' : 'bg-gray-50 opacity-50' }}" {{ old('is_benefit') ? 'required' : 'disabled' }}>
               <option value="olympiad" {{ old('benefit_type')==='olympiad'?'selected':'' }}>Олимпиада</option>
               <option value="disability" {{ old('benefit_type')==='disability'?'selected':'' }}>Инвалидность</option>
+              <option value="svo" {{ old('benefit_type')==='svo'?'selected':'' }}>СВО</option>
             </select>
           </div>
         </div>
