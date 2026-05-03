@@ -10,330 +10,191 @@ use App\Models\Specialty;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Заполнение БД реалистичными тестовыми данными.
-     * 1 админ, 2 сотрудника, 3 абитуриента, 2 специальности, 3 программы, 5 заявлений.
+     * Заполнение БД тестовыми данными: 15 в главных, 30 в подчиненных.
      */
     public function run(): void
     {
-        // === Пользователи ===
-        $admin = User::create([
+        $faker = Faker::create('ru_RU');
+
+        // Создаем директорию для документов
+        Storage::disk('public')->makeDirectory('documents');
+
+        $templateImage = base_path('templates/заглушка.png');
+        $hasTemplate = file_exists($templateImage);
+        
+        $photosCreated = 0;
+
+        $this->command->info('Начинаем заполнение базы данных...');
+
+        // === Администраторы и Комиссия ===
+        User::create([
             'email' => 'admin@portal.ru',
             'password_hash' => Hash::make('password'),
             'role' => 'admin',
+            'is_active' => true,
         ]);
 
-        $commission1 = User::create([
+        User::create([
             'email' => 'smirnova@portal.ru',
             'password_hash' => Hash::make('password'),
             'role' => 'commission',
+            'is_active' => true,
         ]);
 
-        $commission2 = User::create([
-            'email' => 'kozlov@portal.ru',
-            'password_hash' => Hash::make('password'),
-            'role' => 'commission',
-        ]);
+        // === Главные таблицы: 15 записей (Специальности) ===
+        $this->command->info('Создание 15 специальностей (главная таблица)...');
+        $specialties = [];
+        for ($i = 1; $i <= 15; $i++) {
+            $specialties[] = Specialty::create([
+                'code' => $faker->unique()->numerify('##.02.0#'),
+                'name' => 'Специальность ' . $faker->word() . ' ' . $i,
+                'subject_1' => 'Математика',
+                'subject_2' => 'Русский язык',
+                'subject_3' => $faker->randomElement(['Информатика', 'Обществознание', 'Физика', 'История']),
+            ]);
+        }
 
-        $user1 = User::create([
-            'email' => 'ivanov@mail.ru',
-            'password_hash' => Hash::make('password'),
-            'role' => 'applicant',
-        ]);
+        // === Подчиненные таблицы: 30 записей (Программы) ===
+        $this->command->info('Создание 30 программ (подчиненная таблица)...');
+        $programs = [];
+        $currentYear = (int) date('Y');
+        
+        foreach ($specialties as $specialty) {
+            foreach ([0, 1] as $yearOffset) {
+                $programs[] = Program::create([
+                    'specialty_id' => $specialty->id,
+                    'campaign_year' => $currentYear - $yearOffset,
+                    'has_study_form' => $faker->boolean,
+                    'plan_count' => $faker->numberBetween(20, 50),
+                    'plan_count_paid' => $faker->numberBetween(10, 30),
+                    'is_open' => true,
+                    'open_from' => '2024-06-01',
+                    'open_until' => '2026-08-15',
+                ]);
+            }
+        }
 
-        $user2 = User::create([
-            'email' => 'petrova@mail.ru',
-            'password_hash' => Hash::make('password'),
-            'role' => 'applicant',
-        ]);
+        // === Абитуриенты (30 пользователей и 30 профилей) ===
+        $this->command->info('Создание 30 профилей абитуриентов и фото...');
+        $applicants = [];
+        for ($i = 1; $i <= 30; $i++) {
+            $email = $i === 1 ? 'ivanov@mail.ru' : "applicant{$i}@mail.ru";
+            $lastName = $i === 1 ? 'Иванов' : $faker->lastName;
+            $firstName = $i === 1 ? 'Иван' : $faker->firstName;
+            $middleName = $i === 1 ? 'Иванович' : $faker->middleName;
 
-        $user3 = User::create([
-            'email' => 'sidorov@mail.ru',
-            'password_hash' => Hash::make('password'),
-            'role' => 'applicant',
-        ]);
+            $user = User::create([
+                'email' => $email,
+                'password_hash' => Hash::make('password'),
+                'role' => 'applicant',
+                'is_active' => true,
+            ]);
 
-        // === Профили абитуриентов ===
-        $applicant1 = Applicant::create([
-            'user_id' => $user1->id,
-            'last_name' => 'Иванов',
-            'first_name' => 'Иван',
-            'middle_name' => 'Иванович',
-            'birth_date' => '2006-03-15',
-            'passport_series' => '4510',
-            'passport_number' => '123456',
-            'passport_issued_by' => 'ОУФМС России по г. Москве, отдел №1',
-            'snils' => '123-456-789 01',
-            'phone' => '+7 (999) 123-45-67',
-            'prev_education' => '11class',
-            'edu_doc_series' => 'АА',
-            'edu_doc_number' => '1234567',
-            'edu_doc_issued_by' => 'ГБОУ СОШ №100',
-            'edu_issue_date' => '2024-06-20',
-            'avg_cert_score' => 4.75,
-        ]);
+            // Фотографии абитуриента
+            $photos = [];
+            foreach (['passport', 'snils', 'edu_1', 'edu_2', 'edu_3'] as $type) {
+                $filename = "documents/applicant_{$user->id}_{$type}.png";
+                if ($hasTemplate) {
+                    Storage::disk('public')->put($filename, file_get_contents($templateImage));
+                    $photosCreated++;
+                }
+                $photos["photo_{$type}"] = $filename;
+            }
 
-        $applicant2 = Applicant::create([
-            'user_id' => $user2->id,
-            'last_name' => 'Петрова',
-            'first_name' => 'Анна',
-            'middle_name' => 'Сергеевна',
-            'birth_date' => '2006-07-22',
-            'passport_series' => '4511',
-            'passport_number' => '654321',
-            'passport_issued_by' => 'ОУФМС России по г. Санкт-Петербургу',
-            'snils' => '987-654-321 09',
-            'phone' => '+7 (912) 987-65-43',
-            'prev_education' => '9class',
-            'edu_doc_series' => 'ББ',
-            'edu_doc_number' => '7654321',
-            'edu_doc_issued_by' => 'ГБОУ Лицей №42',
-            'edu_issue_date' => '2024-06-18',
-            'avg_cert_score' => 4.50,
-        ]);
+            $applicant = Applicant::create(array_merge([
+                'user_id' => $user->id,
+                'last_name' => $lastName,
+                'first_name' => $firstName,
+                'middle_name' => $middleName,
+                'birth_date' => $faker->date('Y-m-d', '2008-01-01'),
+                'passport_series' => (string) $faker->numberBetween(1000, 9999),
+                'passport_number' => (string) $faker->numberBetween(100000, 999999),
+                'passport_issued_by' => 'ОУФМС ' . mb_substr($faker->city, 0, 50),
+                'snils' => $faker->numerify('###-###-### ##'),
+                'phone' => '+7 ' . $faker->numerify('(###) ###-##-##'),
+                'prev_education' => $faker->randomElement(['9class', '11class']),
+                'edu_doc_series' => strtoupper(Str::random(2)),
+                'edu_doc_number' => (string) $faker->numberBetween(1000000, 9999999),
+                'edu_doc_issued_by' => mb_substr('Школа ' . $faker->company, 0, 50),
+                'edu_issue_date' => $faker->date('Y-m-d', '2024-06-30'),
+                'avg_cert_score' => $faker->randomFloat(2, 3, 5),
+            ], $photos));
 
-        $applicant3 = Applicant::create([
-            'user_id' => $user3->id,
-            'last_name' => 'Сидоров',
-            'first_name' => 'Дмитрий',
-            'middle_name' => 'Константинович',
-            'birth_date' => '2005-11-08',
-            'passport_series' => '4512',
-            'passport_number' => '111222',
-            'passport_issued_by' => 'ОВД по Центральному р-ну г. Казани',
-            'snils' => '111-222-333 44',
-            'phone' => '+7 (905) 111-22-33',
-            'prev_education' => '11class',
-            'edu_doc_series' => 'ВВ',
-            'edu_doc_number' => '9876543',
-            'edu_doc_issued_by' => 'МАОУ Гимназия №5',
-            'edu_issue_date' => '2024-06-15',
-            'avg_cert_score' => 4.90,
-        ]);
+            $applicants[] = $applicant;
+        }
 
-        // === Специальности ===
-        $spec1 = Specialty::create([
-            'code' => '09.02.07',
-            'name' => 'Информационные системы и программирование',
-            'subject_1' => 'Математика',
-            'subject_2' => 'Русский язык',
-            'subject_3' => 'Информатика',
-        ]);
+        // === Заявления (30 записей) ===
+        $this->command->info('Создание 30 заявлений и снапшотов фото...');
+        foreach ($applicants as $index => $applicant) {
+            $program = $programs[$index % 30]; 
 
-        $spec2 = Specialty::create([
-            'code' => '38.02.01',
-            'name' => 'Экономика и бухгалтерский учёт',
-            'subject_1' => 'Математика',
-            'subject_2' => 'Русский язык',
-            'subject_3' => 'Обществознание',
-        ]);
+            // Фотографии заявления
+            $appPhotos = [];
+            foreach (['passport', 'snils', 'edu_1', 'edu_2', 'edu_3'] as $type) {
+                $filename = "documents/app_{$applicant->id}_{$program->id}_{$type}.png";
+                if ($hasTemplate) {
+                    Storage::disk('public')->put($filename, file_get_contents($templateImage));
+                    $photosCreated++;
+                }
+                $appPhotos["app_photo_{$type}"] = $filename;
+            }
+            
+            $signedDocFilename = "documents/app_{$applicant->id}_{$program->id}_signed_doc.png";
+            if ($hasTemplate) {
+                Storage::disk('public')->put($signedDocFilename, file_get_contents($templateImage));
+                $photosCreated++;
+            }
 
-        // === Программы ===
-        $prog1 = Program::create([
-            'specialty_id' => $spec1->id,
-            'campaign_year' => (int) date('Y'),
-            'has_study_form' => true,
-            'plan_count' => 50,
-            'plan_count_paid' => 30,
-            'is_open' => true,
-            'open_from' => '2024-06-01',
-            'open_until' => '2026-08-15',
-        ]);
+            $application = Application::create(array_merge([
+                'applicant_id' => $applicant->id,
+                'program_id' => $program->id,
+                'priority' => 1,
+                'status' => $faker->randomElement(['draft', 'submitted', 'approved', 'rejected', 'rework_needed', 'cancelled']),
+                'revision' => 1,
+                'doc_type' => $faker->randomElement(['original', 'copy']),
+                'study_form' => $faker->randomElement(['full_time', 'part_time']),
+                'funding_type' => $faker->randomElement(['budget', 'paid']),
+                'is_benefit' => $faker->boolean(20),
+                'needs_dorm' => $faker->boolean,
+                'is_first_spo' => true,
+                'app_last_name' => $applicant->last_name,
+                'app_first_name' => $applicant->first_name,
+                'app_middle_name' => $applicant->middle_name,
+                'app_birth_date' => $applicant->birth_date,
+                'app_passport_series' => $applicant->passport_series,
+                'app_passport_number' => $applicant->passport_number,
+                'app_passport_issued_by' => $applicant->passport_issued_by,
+                'app_snils' => $applicant->snils,
+                'app_prev_education' => $applicant->prev_education,
+                'app_edu_doc_series' => $applicant->edu_doc_series,
+                'app_edu_doc_number' => $applicant->edu_doc_number,
+                'app_edu_doc_issued_by' => $applicant->edu_doc_issued_by,
+                'app_edu_issue_date' => $applicant->edu_issue_date,
+                'app_avg_cert_score' => $applicant->avg_cert_score,
+                'app_phone' => $applicant->phone,
+                'signed_doc_photo' => $signedDocFilename,
+            ], $appPhotos));
 
-        $prog2 = Program::create([
-            'specialty_id' => $spec1->id,
-            'campaign_year' => (int) date('Y'),
-            'has_study_form' => false,
-            'plan_count' => 25,
-            'plan_count_paid' => 15,
-            'is_open' => true,
-            'open_from' => '2024-06-01',
-            'open_until' => '2026-08-15',
-        ]);
+            // Оценки по предметам для заявления
+            $specialty = $program->specialty;
+            $subjects = array_filter([$specialty->subject_1, $specialty->subject_2, $specialty->subject_3]);
+            
+            foreach ($subjects as $subject) {
+                ApplicationScore::create([
+                    'application_id' => $application->id,
+                    'subject_name' => $subject,
+                    'score' => $faker->randomFloat(1, 3, 5),
+                ]);
+            }
+        }
 
-        $prog3 = Program::create([
-            'specialty_id' => $spec2->id,
-            'campaign_year' => (int) date('Y'),
-            'has_study_form' => true,
-            'plan_count' => 40,
-            'plan_count_paid' => 20,
-            'is_open' => true,
-            'open_from' => '2024-06-01',
-            'open_until' => '2026-08-15',
-        ]);
-
-        // === Заявления с разными статусами ===
-
-        // Заявление 1: Иванов → ИСиП, submitted
-        $app1 = Application::create([
-            'applicant_id' => $applicant1->id,
-            'program_id' => $prog1->id,
-            'priority' => 1,
-            'status' => 'submitted',
-            'revision' => 1,
-            'doc_type' => 'original',
-            'study_form' => 'full_time',
-            'funding_type' => 'budget',
-            'is_benefit' => false,
-            'needs_dorm' => true,
-            'is_first_spo' => true,
-            'app_last_name' => 'Иванов',
-            'app_first_name' => 'Иван',
-            'app_middle_name' => 'Иванович',
-            'app_birth_date' => '2006-03-15',
-            'app_passport_series' => '4510',
-            'app_passport_number' => '123456',
-            'app_passport_issued_by' => 'ОУФМС России по г. Москве, отдел №1',
-            'app_snils' => '123-456-789 01',
-            'app_prev_education' => '11class',
-            'app_edu_doc_series' => 'АА',
-            'app_edu_doc_number' => '1234567',
-            'app_edu_doc_issued_by' => 'ГБОУ СОШ №100',
-            'app_edu_issue_date' => '2024-06-20',
-            'app_avg_cert_score' => 4.75,
-            'app_phone' => '+7 (999) 123-45-67',
-        ]);
-        ApplicationScore::create(['application_id' => $app1->id, 'subject_name' => 'Математика', 'score' => 4.5]);
-        ApplicationScore::create(['application_id' => $app1->id, 'subject_name' => 'Русский язык', 'score' => 5.0]);
-        ApplicationScore::create(['application_id' => $app1->id, 'subject_name' => 'Информатика', 'score' => 4.0]);
-
-        // Заявление 2: Иванов → Экономика, approved
-        $app2 = Application::create([
-            'applicant_id' => $applicant1->id,
-            'program_id' => $prog3->id,
-            'priority' => 2,
-            'status' => 'approved',
-            'revision' => 1,
-            'doc_type' => 'copy',
-            'study_form' => 'full_time',
-            'funding_type' => 'budget',
-            'is_benefit' => false,
-            'needs_dorm' => false,
-            'is_first_spo' => true,
-            'app_last_name' => 'Иванов',
-            'app_first_name' => 'Иван',
-            'app_middle_name' => 'Иванович',
-            'app_birth_date' => '2006-03-15',
-            'app_passport_series' => '4510',
-            'app_passport_number' => '123456',
-            'app_passport_issued_by' => 'ОУФМС России по г. Москве, отдел №1',
-            'app_snils' => '123-456-789 01',
-            'app_prev_education' => '11class',
-            'app_edu_doc_series' => 'АА',
-            'app_edu_doc_number' => '1234567',
-            'app_edu_doc_issued_by' => 'ГБОУ СОШ №100',
-            'app_edu_issue_date' => '2024-06-20',
-            'app_avg_cert_score' => 4.75,
-            'app_phone' => '+7 (999) 123-45-67',
-        ]);
-        ApplicationScore::create(['application_id' => $app2->id, 'subject_name' => 'Математика', 'score' => 4.5]);
-        ApplicationScore::create(['application_id' => $app2->id, 'subject_name' => 'Русский язык', 'score' => 5.0]);
-        ApplicationScore::create(['application_id' => $app2->id, 'subject_name' => 'Обществознание', 'score' => 4.0]);
-
-        // Заявление 3: Петрова → ИСиП, rejected (ревизия 2)
-        $app3 = Application::create([
-            'applicant_id' => $applicant2->id,
-            'program_id' => $prog1->id,
-            'priority' => 1,
-            'status' => 'rejected',
-            'revision' => 2,
-            'rejection_reason' => 'Неверно заполнены паспортные данные. Проверьте серию и номер паспорта.',
-            'doc_type' => 'original',
-            'study_form' => 'part_time',
-            'funding_type' => 'paid',
-            'is_benefit' => false,
-            'needs_dorm' => false,
-            'is_first_spo' => true,
-            'app_last_name' => 'Петрова',
-            'app_first_name' => 'Анна',
-            'app_middle_name' => 'Сергеевна',
-            'app_birth_date' => '2006-07-22',
-            'app_passport_series' => '4511',
-            'app_passport_number' => '654321',
-            'app_passport_issued_by' => 'ОУФМС России по г. Санкт-Петербургу',
-            'app_snils' => '987-654-321 09',
-            'app_prev_education' => '9class',
-            'app_edu_doc_series' => 'ББ',
-            'app_edu_doc_number' => '7654321',
-            'app_edu_doc_issued_by' => 'ГБОУ Лицей №42',
-            'app_edu_issue_date' => '2024-06-18',
-            'app_avg_cert_score' => 4.50,
-            'app_phone' => '+7 (912) 987-65-43',
-        ]);
-        ApplicationScore::create(['application_id' => $app3->id, 'subject_name' => 'Математика', 'score' => 3.5]);
-        ApplicationScore::create(['application_id' => $app3->id, 'subject_name' => 'Русский язык', 'score' => 4.0]);
-        ApplicationScore::create(['application_id' => $app3->id, 'subject_name' => 'Информатика', 'score' => 3.0]);
-
-        // Заявление 4: Сидоров → ИСиП (заочная), rework_needed
-        $app4 = Application::create([
-            'applicant_id' => $applicant3->id,
-            'program_id' => $prog2->id,
-            'priority' => 1,
-            'status' => 'rework_needed',
-            'revision' => 1,
-            'rejection_reason' => 'Фото аттестата нечитаемо. Загрузите более качественный скан.',
-            'doc_type' => 'original',
-            'study_form' => 'full_time',
-            'funding_type' => 'budget',
-            'is_benefit' => true,
-            'benefit_type' => 'olympiad',
-            'needs_dorm' => true,
-            'is_first_spo' => true,
-            'app_last_name' => 'Сидоров',
-            'app_first_name' => 'Дмитрий',
-            'app_middle_name' => 'Константинович',
-            'app_birth_date' => '2005-11-08',
-            'app_passport_series' => '4512',
-            'app_passport_number' => '111222',
-            'app_passport_issued_by' => 'ОВД по Центральному р-ну г. Казани',
-            'app_snils' => '111-222-333 44',
-            'app_prev_education' => '11class',
-            'app_edu_doc_series' => 'ВВ',
-            'app_edu_doc_number' => '9876543',
-            'app_edu_doc_issued_by' => 'МАОУ Гимназия №5',
-            'app_edu_issue_date' => '2024-06-15',
-            'app_avg_cert_score' => 4.90,
-            'app_phone' => '+7 (905) 111-22-33',
-        ]);
-        ApplicationScore::create(['application_id' => $app4->id, 'subject_name' => 'Математика', 'score' => 5.0]);
-        ApplicationScore::create(['application_id' => $app4->id, 'subject_name' => 'Русский язык', 'score' => 4.5]);
-        ApplicationScore::create(['application_id' => $app4->id, 'subject_name' => 'Информатика', 'score' => 5.0]);
-
-        // Заявление 5: Петрова → Экономика, cancelled
-        $app5 = Application::create([
-            'applicant_id' => $applicant2->id,
-            'program_id' => $prog3->id,
-            'priority' => 3,
-            'status' => 'cancelled',
-            'revision' => 1,
-            'doc_type' => 'copy',
-            'study_form' => 'full_time',
-            'funding_type' => 'paid',
-            'is_benefit' => false,
-            'needs_dorm' => false,
-            'is_first_spo' => true,
-            'cancelled_at' => now(),
-            'app_last_name' => 'Петрова',
-            'app_first_name' => 'Анна',
-            'app_middle_name' => 'Сергеевна',
-            'app_birth_date' => '2006-07-22',
-            'app_passport_series' => '4511',
-            'app_passport_number' => '654321',
-            'app_passport_issued_by' => 'ОУФМС России по г. Санкт-Петербургу',
-            'app_snils' => '987-654-321 09',
-            'app_prev_education' => '9class',
-            'app_edu_doc_series' => 'ББ',
-            'app_edu_doc_number' => '7654321',
-            'app_edu_doc_issued_by' => 'ГБОУ Лицей №42',
-            'app_edu_issue_date' => '2024-06-18',
-            'app_avg_cert_score' => 4.50,
-            'app_phone' => '+7 (912) 987-65-43',
-        ]);
-        ApplicationScore::create(['application_id' => $app5->id, 'subject_name' => 'Математика', 'score' => 3.0]);
-        ApplicationScore::create(['application_id' => $app5->id, 'subject_name' => 'Русский язык', 'score' => 4.5]);
-        ApplicationScore::create(['application_id' => $app5->id, 'subject_name' => 'Обществознание', 'score' => 3.5]);
+        $this->command->info("Готово! Создано файлов фото: {$photosCreated}.");
     }
 }
