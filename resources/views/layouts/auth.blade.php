@@ -4,34 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title', 'Приёмная комиссия ГАПОУ Бугурусланский нефтяной колледж')</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: {
-            primary: { DEFAULT: 'var(--auth-primary)', 50: 'var(--auth-primary-50)', 100: 'var(--auth-primary-100)', 600: 'var(--auth-primary)', 700: 'var(--auth-primary-700)' },
-            secondary: { DEFAULT: '#48b59b', 50: '#effaf7', 100: '#d8f2eb', 600: '#48b59b', 700: '#2f8f79' },
-            accent: { orange: '#f47a00', blue: '#0e5d9f', steel: '#4d759d', yellow: '#ffbf00', red: '#ed3216', magenta: '#b33c96' },
-            success: { DEFAULT: '#48b59b', 600: '#2f8f79' },
-            warning: { DEFAULT: '#f47a00', 600: '#d86600' },
-            danger: { DEFAULT: '#ed3216', 600: '#c92510' },
-            gray: { 50: '#f8f8f7', 100: '#eeeeec', 200: '#dcdad7', 300: '#c4c0bc', 500: '#736f6b', 700: '#3f3a38', 900: '#2b2828' }
-          },
-          borderRadius: { DEFAULT: '0.5rem', lg: '0.5rem' },
-          boxShadow: { sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }
-        }
-      }
-    }
-  </script>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>
     :root {
       --auth-primary: #252581;
       --auth-primary-50: #f2f3ff;
       --auth-primary-100: #e2e5ff;
       --auth-primary-700: #1b1b68;
+      --theme-secondary: #48b59b;
+      --theme-secondary-50: #effaf7;
+      --theme-secondary-100: #d8f2eb;
+      --theme-secondary-700: #2f8f79;
+      --theme-success: #48b59b;
+      --theme-success-600: #2f8f79;
+      --theme-warning: #f47a00;
+      --theme-warning-600: #d86600;
+      --theme-danger: #ed3216;
+      --theme-danger-600: #c92510;
     }
 
     body {
