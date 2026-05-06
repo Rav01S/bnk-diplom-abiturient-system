@@ -17,7 +17,7 @@
   </div>
 </div>
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-  <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">%</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (платно)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (платно)</th><th class="px-4 py-3 text-center font-medium text-gray-500">На проверке</th></tr></thead>
+  <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (бюджет)</th><th class="px-4 py-3 text-center font-medium text-gray-500">%</th><th class="px-4 py-3 text-center font-medium text-gray-500">План (хозрасчёт)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Факт (хозрасчёт)</th><th class="px-4 py-3 text-center font-medium text-gray-500">На проверке</th></tr></thead>
     <tbody class="divide-y divide-gray-200">
       @foreach($stats as $s)
       @php $pct = $s['plan_budget'] > 0 ? round(($s['fact_budget'] / $s['plan_budget']) * 100) : 0; @endphp

@@ -96,8 +96,8 @@
           </label>
           <label id="paidOption" class="funding-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
             <span>
-              <span class="block text-sm font-medium text-gray-900">Платно</span>
-              <span class="block text-xs text-gray-500">Обучение по договору об оказании платных услуг</span>
+              <span class="block text-sm font-medium text-gray-900">Хозрасчёт</span>
+              <span class="block text-xs text-gray-500">Обучение по договору на хозрасчётной основе</span>
             </span>
             <input id="paidInput" type="radio" name="funding_type" value="paid" class="h-4 w-4 text-primary-600" {{ old('funding_type') === 'paid' ? 'checked' : '' }}>
           </label>
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const messages = [];
     if (selected?.value && !hasBudget) messages.push('бюджет недоступен');
-    if (selected?.value && !hasPaid) messages.push('платное обучение недоступно');
+    if (selected?.value && !hasPaid) messages.push('хозрасчёт недоступен');
     if (fundingHint) {
       fundingHint.textContent = messages.length ? 'Для выбранной программы ' + messages.join(', ') + '.' : '';
       fundingHint.classList.toggle('hidden', messages.length === 0);

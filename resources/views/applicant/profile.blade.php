@@ -32,8 +32,8 @@
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
     <h3 class="font-medium text-gray-900 mb-4 pb-3 border-b border-gray-200">Паспортные данные</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div><label for="passport_series" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Серия</label><input type="text" id="passport_series" name="passport_series" required maxlength="4" placeholder="1234" value="{{ old('passport_series', $applicant->passport_series) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
-      <div><label for="passport_number" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Номер</label><input type="text" id="passport_number" name="passport_number" required maxlength="6" placeholder="567890" value="{{ old('passport_number', $applicant->passport_number) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
+      <div><label for="passport_series" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Серия</label><input type="text" id="passport_series" name="passport_series" required maxlength="4" placeholder="1234" inputmode="numeric" pattern="\d{4}" data-mask="passport-series" value="{{ old('passport_series', $applicant->passport_series) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
+      <div><label for="passport_number" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Номер</label><input type="text" id="passport_number" name="passport_number" required maxlength="6" placeholder="567890" inputmode="numeric" pattern="\d{6}" data-mask="passport-number" value="{{ old('passport_number', $applicant->passport_number) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div class="sm:col-span-2 lg:col-span-3"><label for="passport_issued_by" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Кем выдан</label><input type="text" id="passport_issued_by" name="passport_issued_by" required value="{{ old('passport_issued_by', $applicant->passport_issued_by) }}" placeholder="ОУФМС России по г. Москве, отдел №1" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
     </div>
     <div class="mt-4">
@@ -55,7 +55,7 @@
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
     <h3 class="font-medium text-gray-900 mb-4 pb-3 border-b border-gray-200">Документ об образовании</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div><label for="prev_education" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Уровень образования</label><select id="prev_education" name="prev_education" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white"><option value="">Выберите...</option><option value="9class" {{ old('prev_education', $applicant->prev_education)==='9class'?'selected':'' }}>9 классов</option><option value="11class" {{ old('prev_education', $applicant->prev_education)==='11class'?'selected':'' }}>11 классов</option><option value="spo" {{ old('prev_education', $applicant->prev_education)==='spo'?'selected':'' }}>СПО (колледж/техникум)</option><option value="vo" {{ old('prev_education', $applicant->prev_education)==='vo'?'selected':'' }}>ВО (неоконченное высшее)</option></select></div>
+      <div><label for="prev_education" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Уровень образования</label><select id="prev_education" name="prev_education" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white"><option value="">Выберите...</option><option value="9class" {{ old('prev_education', $applicant->prev_education)==='9class'?'selected':'' }}>Основное общее образование</option><option value="11class" {{ old('prev_education', $applicant->prev_education)==='11class'?'selected':'' }}>Среднее общее образование</option><option value="spo" {{ old('prev_education', $applicant->prev_education)==='spo'?'selected':'' }}>СПО (колледж/техникум)</option><option value="vo" {{ old('prev_education', $applicant->prev_education)==='vo'?'selected':'' }}>ВО (неоконченное высшее)</option></select></div>
       <div><label for="avg_cert_score" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Средний балл аттестата</label><input type="text" id="avg_cert_score" name="avg_cert_score" required inputmode="decimal" placeholder="4.75" value="{{ old('avg_cert_score', $applicant->avg_cert_score) }}" data-mask="avg-score" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div><label for="edu_doc_series" class="block text-sm font-medium text-gray-700 mb-1">Серия документа</label><input type="text" id="edu_doc_series" name="edu_doc_series" value="{{ old('edu_doc_series', $applicant->edu_doc_series) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
       <div><label for="edu_doc_number" class="block text-sm font-medium text-gray-700 mb-1">Номер документа</label><input type="text" id="edu_doc_number" name="edu_doc_number" value="{{ old('edu_doc_number', $applicant->edu_doc_number) }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring"></div>
@@ -156,6 +156,14 @@ document.querySelector('[data-mask="snils"]')?.addEventListener('input', functio
   const digits = digitsOnly(this.value).slice(0, 11);
   const parts = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 9)].filter(Boolean);
   this.value = parts.join('-') + (digits.length > 9 ? ' ' + digits.slice(9, 11) : '');
+});
+
+document.querySelector('[data-mask="passport-series"]')?.addEventListener('input', function() {
+  this.value = digitsOnly(this.value).slice(0, 4);
+});
+
+document.querySelector('[data-mask="passport-number"]')?.addEventListener('input', function() {
+  this.value = digitsOnly(this.value).slice(0, 6);
 });
 
 document.querySelector('[data-mask="avg-score"]')?.addEventListener('input', function() {

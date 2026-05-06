@@ -40,8 +40,8 @@ class ApplicationReviewRequest extends FormRequest
         return [
             'decision.required' => 'Выберите решение.',
             'decision.in' => 'Недопустимый тип решения.',
-            'rejection_reason.required' => 'Укажите причину отклонения (минимум 10 символов).',
-            'rejection_reason.min' => 'Причина должна содержать минимум 10 символов.',
+            'rejection_reason.required' => 'Укажите комментарий сотрудника (минимум 10 символов).',
+            'rejection_reason.min' => 'Комментарий сотрудника должен содержать минимум 10 символов.',
         ];
     }
 }

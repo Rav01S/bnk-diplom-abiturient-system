@@ -93,7 +93,7 @@ class ApplicationStoreRequest extends FormRequest
             }
 
             if ($this->input('funding_type') === 'paid' && $program->plan_count_paid <= 0) {
-                $validator->errors()->add('funding_type', 'Для выбранной программы нет платных мест.');
+                $validator->errors()->add('funding_type', 'Для выбранной программы нет мест на хозрасчёт.');
             }
         });
     }

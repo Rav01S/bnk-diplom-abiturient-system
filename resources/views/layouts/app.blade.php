@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@yield('title', 'Приёмная комиссия Бугурусланского нефтяного колледжа')</title>
+  <title>@yield('title', 'Приёмная комиссия ГАПОУ Бугурусланский нефтяной колледж')</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -48,7 +48,7 @@
           @endif
         </div>
         <span class="font-semibold text-gray-900">
-          @if(auth()->user()->isAdmin()) Панель администратора @else Приёмная комиссия БНК @endif
+          @if(auth()->user()->isAdmin()) Панель администратора @else Приёмная комиссия ГАПОУ Бугурусланский нефтяной колледж @endif
         </span>
       </div>
       <button id="closeSidebar" class="lg:hidden p-1 text-gray-500 hover:text-gray-700" aria-label="Закрыть меню">

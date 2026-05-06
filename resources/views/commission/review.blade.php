@@ -15,7 +15,7 @@
       <div><p class="text-gray-500 text-xs">Паспорт</p><p class="font-mono">{{ $application->app_passport_series }} {{ $application->app_passport_number }}</p></div>
       <div><p class="text-gray-500 text-xs">СНИЛС</p><p class="font-mono">{{ $application->app_snils }}</p></div>
       <div><p class="text-gray-500 text-xs">Форма обучения</p><p class="font-medium">{{ $application->study_form === 'full_time' ? 'Очная' : 'Заочная' }}</p></div>
-      <div><p class="text-gray-500 text-xs">Финансирование</p><p class="font-medium">{{ $application->funding_type === 'budget' ? 'Бюджет' : 'Платное' }}</p></div>
+      <div><p class="text-gray-500 text-xs">Финансирование</p><p class="font-medium">{{ $application->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }}</p></div>
       <div class="sm:col-span-2 p-2 bg-amber-50 rounded border border-amber-100 flex items-center justify-between">
         <div><p class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Особые права (Льгота)</p>
         <p class="font-bold text-gray-900">
@@ -37,6 +37,7 @@
       <div class="p-2 bg-gray-50 rounded text-center"><p class="text-xs text-gray-500">{{ $score->subject_name }}</p><p class="font-bold text-lg">{{ $score->score }} <span class="text-xs text-gray-400 font-normal">(балл)</span></p></div>
       @endforeach
     </div>
+    <p class="-mt-4 mb-6 text-sm text-gray-600">Средний балл: <strong>{{ number_format($application->average_score, 2, ',', '') }}</strong></p>
 
     <form method="POST" action="{{ route('commission.review.submit', array_merge(['application' => $application], request()->query())) }}" id="reviewForm">
       @csrf
@@ -47,8 +48,8 @@
         <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer"><input type="checkbox" class="review-check w-4 h-4 text-primary-600 rounded"><span class="text-sm text-gray-700">Подпись на заявлении есть</span></label>
       </div>
 
-      <h3 class="font-medium text-gray-900 mb-2">Комментарий (обязателен при отклонении)</h3>
-      <textarea id="rejection_reason" name="rejection_reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4" rows="2" placeholder="Причина отклонения...">{{ old('rejection_reason') }}</textarea>
+      <h3 class="font-medium text-gray-900 mb-2">Комментарий сотрудника (обязателен при отклонении и доработке)</h3>
+      <textarea id="rejection_reason" name="rejection_reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4" rows="2" placeholder="Причина отклонения или список правок...">{{ old('rejection_reason', $application->rejection_reason) }}</textarea>
 
       <div class="flex flex-wrap gap-3 pt-2">
         <button type="submit" name="decision" value="approved" id="approveBtn" class="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50" disabled>✓ Подтвердить</button>
@@ -100,7 +101,7 @@
       </div>
       @endif
     </div>
-    <div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">⚠️ При отклонении обязателен комментарий с указанием причины.</div>
+    <div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">⚠️ При отклонении или отправке на доработку обязателен комментарий с указанием причины.</div>
   </div>
 </div>
 
@@ -119,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
   checks.forEach(c => c.addEventListener('change', () => { approveBtn.disabled = ![...checks].every(x => x.checked); }));
   document.getElementById('reviewForm').addEventListener('submit', function(e) {
     const decision = e.submitter?.value;
-    if ((decision === 'rejected' || decision === 'rework_needed') && !document.getElementById('rejection_reason').value.trim()) { e.preventDefault(); alert('Укажите причину отклонения!'); }
+    if ((decision === 'rejected' || decision === 'rework_needed') && !document.getElementById('rejection_reason').value.trim()) { e.preventDefault(); alert('Укажите комментарий сотрудника!'); }
   });
 });
 function openZoom(src) { document.getElementById('zoomImg').src = src; document.getElementById('zoomOverlay').classList.add('active'); }

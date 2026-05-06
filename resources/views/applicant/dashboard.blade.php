@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Дашборд | Приёмная комиссия БНК')
-@section('header', 'Дашборд абитуриента')
+@section('title', 'Главная страница | Приёмная комиссия БНК')
+@section('header', 'Главная страница')
 @section('sidebar') @include('partials.sidebar-applicant') @endsection
 @section('content')
 <div class="mb-6">
   <h2 class="text-xl font-semibold text-gray-900 mb-1">Добро пожаловать, {{ auth()->user()->applicant->first_name ?? 'Абитуриент' }}! 👋</h2>
-  <p class="text-gray-500 text-sm">Приёмная комиссия Бугурусланского нефтяного колледжа • {{ date('Y') }} • Очно / Заочно • Бюджет / Платно</p>
+  <p class="text-gray-500 text-sm">Приёмная комиссия ГАПОУ Бугурусланский нефтяной колледж • {{ date('Y') }} • Очно / Заочно • Бюджет / Хозрасчёт</p>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -57,7 +57,7 @@
         <tr class="hover:bg-gray-50 transition">
           <td class="px-4 py-3 font-mono text-xs text-gray-600">#{{ $app->id }}</td>
           <td class="px-4 py-3"><div class="font-medium text-gray-900 truncate max-w-xs">{{ $app->program->specialty->full_title }}</div></td>
-          <td class="px-4 py-3 text-xs text-gray-600">{{ $app->study_form === 'full_time' ? 'Очная' : 'Заочная' }}<br><span class="{{ $app->funding_type === 'budget' ? 'text-green-700' : 'text-orange-700' }}">{{ $app->funding_type === 'budget' ? 'Бюджет' : 'Платно' }}</span></td>
+          <td class="px-4 py-3 text-xs text-gray-600">{{ $app->study_form === 'full_time' ? 'Очная' : 'Заочная' }}<br><span class="{{ $app->funding_type === 'budget' ? 'text-green-700' : 'text-orange-700' }}">{{ $app->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }}</span></td>
           <td class="px-4 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-xs font-medium text-gray-700">{{ $app->priority }}</span></td>
           <td class="px-4 py-3">@include('partials.status-badge', ['status' => $app->status])</td>
           <td class="px-4 py-3 text-gray-600 text-xs">{{ $app->created_at->format('d.m.Y') }}</td>

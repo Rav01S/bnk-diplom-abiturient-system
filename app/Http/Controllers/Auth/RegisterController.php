@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RegisterRequest;
 use App\Models\Applicant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -19,28 +19,9 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
-    /**
-     * Регистрация абитуриента — создаёт User + Applicant в транзакции.
-     */
-    public function register(Request $request): RedirectResponse
+    public function register(RegisterRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'last_name' => ['required', 'string', 'max:100'],
-            'first_name' => ['required', 'string', 'max:100'],
-            'middle_name' => ['nullable', 'string', 'max:100'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'consent' => ['accepted'],
-        ], [
-            'last_name.required' => 'Фамилия обязательна.',
-            'first_name.required' => 'Имя обязательно.',
-            'email.required' => 'Укажите email.',
-            'email.unique' => 'Этот email уже зарегистрирован.',
-            'password.required' => 'Укажите пароль.',
-            'password.min' => 'Пароль минимум 8 символов.',
-            'password.confirmed' => 'Пароли не совпадают.',
-            'consent.accepted' => 'Необходимо согласие на обработку данных.',
-        ]);
+        $validated = $request->validated();
 
         $user = DB::transaction(function () use ($validated): User {
             $user = User::create([

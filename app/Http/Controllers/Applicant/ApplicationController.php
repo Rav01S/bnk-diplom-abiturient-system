@@ -8,6 +8,7 @@ use App\Models\Application;
 use App\Models\ApplicationScore;
 use App\Models\Program;
 use App\Models\Specialty;
+use App\Services\RankingExportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -132,7 +133,7 @@ class ApplicationController extends Controller
         }
 
         if ($validated['funding_type'] === 'paid' && $program->plan_count_paid <= 0) {
-            return back()->withErrors(['funding_type' => 'Для выбранной программы нет платных мест.']);
+            return back()->withErrors(['funding_type' => 'Для выбранной программы нет мест на хозрасчёт.']);
         }
 
         // Проверка на дубликат: та же специальность, форма обучения и тип финансирования
@@ -276,7 +277,6 @@ class ApplicationController extends Controller
             // Ревизия и статус
             $application->revision++;
             $application->status = 'submitted';
-            $application->rejection_reason = null;
             $application->save();
             $this->insertApplicationPriority($applicant, $application, (int) $validated['priority']);
 
@@ -393,6 +393,17 @@ class ApplicationController extends Controller
         $templateProcessor->saveAs($tempPath);
 
         return response()->download($tempPath)->deleteFileAfterSend(true);
+    }
+
+    public function downloadRanking(Application $application, RankingExportService $rankingExportService)
+    {
+        $this->authorizeApplicant($application);
+        $application->load('program.specialty');
+
+        $path = $rankingExportService->make($application->program, $application->funding_type);
+        $fileName = 'Ранжирование_'.$application->program->specialty->code.'_'.$application->funding_type.'.xlsx';
+
+        return response()->download($path, $fileName)->deleteFileAfterSend(true);
     }
 
     public function downloadDraftTemplate(Request $request)

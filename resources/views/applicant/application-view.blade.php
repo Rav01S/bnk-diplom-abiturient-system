@@ -13,7 +13,7 @@
         @include('partials.status-badge', ['status' => $application->status])
       </div>
       @if($application->rejection_reason)
-      <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800"><strong>Причина отклонения:</strong> {{ $application->rejection_reason }}</div>
+      <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900"><strong>Комментарий сотрудника:</strong> {{ $application->rejection_reason }}</div>
       @endif
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
         <div><p class="text-gray-500 text-xs">ФИО</p><p class="font-medium">{{ $application->app_full_name }}</p></div>
@@ -21,7 +21,7 @@
         <div><p class="text-gray-500 text-xs">Паспорт</p><p class="font-mono">{{ $application->app_passport_series }} {{ $application->app_passport_number }}</p></div>
         <div><p class="text-gray-500 text-xs">СНИЛС</p><p class="font-mono">{{ $application->app_snils }}</p></div>
         <div><p class="text-gray-500 text-xs">Специальность</p><p class="font-medium">{{ $application->program->specialty->full_title }}</p></div>
-        <div><p class="text-gray-500 text-xs">Форма / Финансирование</p><p class="font-medium">{{ $application->study_form === 'full_time' ? 'Очная' : 'Заочная' }} / {{ $application->funding_type === 'budget' ? 'Бюджет' : 'Платно' }}</p></div>
+        <div><p class="text-gray-500 text-xs">Форма / Финансирование</p><p class="font-medium">{{ $application->study_form === 'full_time' ? 'Очная' : 'Заочная' }} / {{ $application->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }}</p></div>
         <div><p class="text-gray-500 text-xs">Приоритет</p><p class="font-medium">{{ $application->priority }}</p></div>
         <div><p class="text-gray-500 text-xs">Льгота</p><p class="font-medium">
           @if($application->is_benefit)
@@ -42,7 +42,7 @@
         <div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">{{ $score->subject_name }}</p><p class="text-xl font-bold text-gray-900">{{ $score->score }}</p></div>
         @endforeach
       </div>
-      <p class="mt-2 text-sm text-gray-600">Сумма баллов: <strong>{{ $application->total_score }}</strong></p>
+      <p class="mt-2 text-sm text-gray-600">Средний балл: <strong>{{ number_format($application->average_score, 2, ',', '') }}</strong></p>
     </div>
   </div>
 
@@ -51,6 +51,7 @@
       <h3 class="font-medium text-gray-900 mb-3">Действия</h3>
       <div class="space-y-2">
         <a href="{{ route('applicant.applications.template', $application) }}" class="block w-full text-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">📄 Скачать шаблон</a>
+        <a href="{{ route('applicant.applications.ranking', $application) }}" target="_blank" class="block w-full text-center px-4 py-2 border border-primary-600 text-primary-700 rounded-lg text-sm hover:bg-primary-50">Посмотреть ранжирование</a>
         @if($application->isEditable())<a href="{{ route('applicant.applications.edit', $application) }}" class="block w-full text-center px-4 py-2 bg-warning-600 hover:bg-warning-700 text-white rounded-lg text-sm">✏️ Редактировать</a>@endif
         @if($application->isCancellable())<form method="POST" action="{{ route('applicant.applications.cancel', $application) }}" onsubmit="return confirm('Отменить заявление?')">@csrf @method('PATCH')<button type="submit" class="w-full px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm">✕ Отменить</button></form>@endif
       </div>

@@ -66,6 +66,7 @@ Route::prefix('applicant')->middleware(['auth', 'role:applicant'])->name('applic
     Route::patch('/applications/{application}/cancel', [ApplicationController::class, 'cancel'])->name('applications.cancel');
     Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
     Route::get('/applications/{application}/template', [ApplicationController::class, 'downloadTemplate'])->name('applications.template');
+    Route::get('/applications/{application}/ranking', [ApplicationController::class, 'downloadRanking'])->name('applications.ranking');
     Route::post('/applications/draft-template', [ApplicationController::class, 'downloadDraftTemplate'])->name('applications.draft-template');
 });
 
