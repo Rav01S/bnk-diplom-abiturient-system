@@ -19,13 +19,13 @@
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
-      <thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">№</th><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-left font-medium text-gray-500">Форма/Финанс.</th><th class="px-4 py-3 text-left font-medium text-gray-500">Средний балл</th><th class="px-4 py-3 text-left font-medium text-gray-500">Приоритет</th><th class="px-4 py-3 text-left font-medium text-gray-500">Статус</th><th class="px-4 py-3 text-left font-medium text-gray-500">Дата</th><th class="px-4 py-3 text-right font-medium text-gray-500">Действия</th></tr></thead>
+      <thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">№</th><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-left font-medium text-gray-500">Финансирование</th><th class="px-4 py-3 text-left font-medium text-gray-500">Средний балл</th><th class="px-4 py-3 text-left font-medium text-gray-500">Приоритет</th><th class="px-4 py-3 text-left font-medium text-gray-500">Статус</th><th class="px-4 py-3 text-left font-medium text-gray-500">Дата</th><th class="px-4 py-3 text-right font-medium text-gray-500">Действия</th></tr></thead>
       <tbody class="divide-y divide-gray-200">
         @forelse($applications as $app)
         <tr class="hover:bg-gray-50 transition">
           <td class="px-4 py-3 font-mono text-xs text-gray-600">#{{ $app->id }}</td>
           <td class="px-4 py-3"><div class="font-medium text-gray-900 truncate max-w-xs">{{ $app->program->specialty->full_title }}</div><div class="text-xs text-gray-500">{{ $app->doc_type === 'original' ? 'Оригинал' : 'Копия' }}{{ $app->is_benefit ? ' • Льгота' : '' }}{{ $app->needs_dorm ? ' • Общежитие' : '' }}</div></td>
-          <td class="px-4 py-3 text-xs text-gray-600">{{ $app->study_form === 'full_time' ? 'Очная' : 'Заочная' }}<br><span class="{{ $app->funding_type === 'budget' ? 'text-green-700' : 'text-orange-700' }}">{{ $app->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }}</span></td>
+          <td class="px-4 py-3 text-xs text-blue-700">{{ $app->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }}</td>
           <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ number_format($app->average_score, 2, ',', '') }}</td>
           <td class="px-4 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-xs font-medium text-gray-700">{{ $app->priority }}</span></td>
           <td class="px-4 py-3">@include('partials.status-badge', ['status' => $app->status])</td>

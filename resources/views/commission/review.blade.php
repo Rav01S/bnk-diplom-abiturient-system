@@ -14,9 +14,8 @@
       <div><p class="text-gray-500 text-xs">Дата рождения</p><p class="font-medium">{{ $application->app_birth_date?->format('d.m.Y') ?? '—' }}</p></div>
       <div><p class="text-gray-500 text-xs">Паспорт</p><p class="font-mono">{{ $application->app_passport_series }} {{ $application->app_passport_number }}</p></div>
       <div><p class="text-gray-500 text-xs">СНИЛС</p><p class="font-mono">{{ $application->app_snils }}</p></div>
-      <div><p class="text-gray-500 text-xs">Форма обучения</p><p class="font-medium">{{ $application->study_form === 'full_time' ? 'Очная' : 'Заочная' }}</p></div>
       <div><p class="text-gray-500 text-xs">Финансирование</p><p class="font-medium">{{ $application->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }}</p></div>
-      <div class="sm:col-span-2 p-2 bg-amber-50 rounded border border-amber-100 flex items-center justify-between">
+      <div class="sm:col-span-2 p-2 bg-blue-50 rounded border border-blue-100 flex items-center justify-between">
         <div><p class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Особые права (Льгота)</p>
         <p class="font-bold text-gray-900">
           @if($application->is_benefit)
@@ -26,7 +25,7 @@
           @endif
         </p></div>
         @if($application->is_benefit)
-          <span class="px-2 py-1 bg-amber-200 text-amber-800 text-[10px] font-bold rounded uppercase">Требует проверки</span>
+          <span class="px-2 py-1 bg-blue-200 text-blue-800 text-[10px] font-bold rounded uppercase">Требует проверки</span>
         @endif
       </div>
     </div>
@@ -55,9 +54,9 @@
       <textarea id="rejection_reason" name="rejection_reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4" rows="2" placeholder="Причина отклонения или список правок...">{{ old('rejection_reason', $application->rejection_reason) }}</textarea>
 
       <div class="flex flex-wrap gap-3 pt-2">
-        <button type="submit" name="decision" value="approved" id="approveBtn" class="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50" disabled>✓ Подтвердить</button>
-        <button type="submit" name="decision" value="rework_needed" class="flex-1 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg">↻ На доработку</button>
-        <button type="submit" name="decision" value="rejected" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg">✕ Отклонить</button>
+        <button type="submit" name="decision" value="approved" id="approveBtn" class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50" disabled>✓ Подтвердить</button>
+        <button type="submit" name="decision" value="rework_needed" class="flex-1 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg">↻ На доработку</button>
+        <button type="submit" name="decision" value="rejected" class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg">✕ Отклонить</button>
       </div>
     </form>
   </div>
@@ -104,7 +103,7 @@
       </div>
       @endif
     </div>
-    <div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">⚠️ При отклонении или отправке на доработку обязателен комментарий с указанием причины.</div>
+    <div class="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">⚠️ При отклонении или отправке на доработку обязателен комментарий с указанием причины.</div>
   </div>
 </div>
 

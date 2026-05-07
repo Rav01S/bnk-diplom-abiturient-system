@@ -12,11 +12,11 @@
   <div class="flex flex-wrap gap-2">
     <form method="POST" action="{{ route('admin.campaign.open-all') }}">
       @csrf
-      <button type="submit" class="px-4 py-2 bg-success hover:bg-green-700 text-white font-medium rounded-lg text-sm">Открыть все</button>
+      <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm">Открыть все</button>
     </form>
     <form method="POST" action="{{ route('admin.campaign.close-all') }}">
       @csrf
-      <button type="submit" class="px-4 py-2 bg-danger hover:bg-red-700 text-white font-medium rounded-lg text-sm">Закрыть все</button>
+      <button type="submit" class="px-4 py-2 bg-danger hover:bg-blue-700 text-white font-medium rounded-lg text-sm">Закрыть все</button>
     </form>
   </div>
 </div>
@@ -42,7 +42,7 @@
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
                 <div class="font-medium text-gray-900">{{ $prog->specialty->full_title }}</div>
-                <div class="text-xs text-gray-500">{{ $prog->has_study_form ? 'Очная/Заочная' : 'Только очная' }} · {{ $prog->campaign_year }}</div>
+                <div class="text-xs text-gray-500">{{ $prog->campaign_year }}</div>
               </td>
               <td class="px-4 py-3 text-center">
                 <input type="checkbox" name="programs[{{ $prog->id }}][is_open]" value="1" {{ $prog->is_open ? 'checked' : '' }} class="w-4 h-4 text-primary-600 rounded">

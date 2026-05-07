@@ -11,20 +11,19 @@
 @foreach($specialties as $spec)
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 overflow-hidden">
   <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-    <div><h3 class="font-medium text-gray-900">{{ $spec->code }} — {{ $spec->name }} @if($spec->is_profession) <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Профессия</span> @else <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Специальность</span> @endif</h3><p class="text-xs text-gray-500">Предметы: {{ implode(', ', $spec->subjects) }}</p></div>
-    <form method="POST" action="{{ route('admin.specialties.destroy', $spec) }}" onsubmit="return confirm('Удалить специальность «{{ $spec->code }}»? Все программы и заявления по ней будут также удалены!')">@csrf @method('DELETE')<button type="submit" class="text-danger hover:text-red-700 text-xs font-medium">Удалить</button></form>
+    <div><h3 class="font-medium text-gray-900">{{ $spec->code }} — {{ $spec->name }} @if($spec->is_profession) <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Профессия</span> @else <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Специальность</span> @endif</h3><p class="text-xs text-gray-500">Предметы: {{ implode(', ', $spec->subjects) }}</p></div>
+    <form method="POST" action="{{ route('admin.specialties.destroy', $spec) }}" onsubmit="return confirm('Удалить специальность «{{ $spec->code }}»? Все программы и заявления по ней будут также удалены!')">@csrf @method('DELETE')<button type="submit" class="text-danger hover:text-blue-700 text-xs font-medium">Удалить</button></form>
   </div>
-  <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50/50"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Год</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Форма</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Бюджет</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Платно</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Статус</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Период</th><th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Действия</th></tr></thead>
+  <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50/50"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Год</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Бюджет</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Платно</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Статус</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Период</th><th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Действия</th></tr></thead>
     <tbody class="divide-y divide-gray-100">
       @forelse($spec->programs as $prog)
       <tr class="hover:bg-gray-50">
         <td class="px-4 py-2 font-medium">{{ $prog->campaign_year }}</td>
-        <td class="px-4 py-2 text-xs text-gray-500">{{ $prog->has_study_form ? 'Очная/Заочная' : 'Только очная' }}</td>
         <td class="px-4 py-2 text-center">{{ $prog->plan_count }}</td>
         <td class="px-4 py-2 text-center">{{ $prog->plan_count_paid }}</td>
         <td class="px-4 py-2 text-center">
           <form method="POST" action="{{ route('admin.programs.toggle', $prog) }}" class="inline">@csrf @method('PATCH')
-            <button type="submit" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $prog->is_open ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">
+            <button type="submit" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $prog->is_open ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600' }}">
               {{ $prog->is_open ? '✓ Открыто' : '✕ Закрыто' }}
             </button>
           </form>
@@ -36,7 +35,6 @@
             year: {{ $prog->campaign_year }},
             plan: {{ $prog->plan_count }},
             plan_paid: {{ $prog->plan_count_paid }},
-            has_form: {{ $prog->has_study_form ? 1 : 0 }},
             is_open: {{ $prog->is_open ? 1 : 0 }},
             from: '{{ $prog->open_from?->toDateString() }}',
             until: '{{ $prog->open_until?->toDateString() }}'
@@ -45,7 +43,7 @@
         </td>
       </tr>
       @empty
-      <tr><td colspan="7" class="px-4 py-4 text-center text-gray-500 text-xs">Нет программ</td></tr>
+      <tr><td colspan="6" class="px-4 py-4 text-center text-gray-500 text-xs">Нет программ</td></tr>
       @endforelse
     </tbody></table></div>
   <div class="px-4 py-3 border-t border-gray-100 bg-gray-50/30">
@@ -81,7 +79,6 @@
         <div><label class="block text-xs font-medium text-gray-700 mb-1">Мест (платно)</label><input type="number" name="plan_count_paid" required value="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
       </div>
       <div class="flex gap-6">
-        <label class="flex items-center cursor-pointer"><input type="checkbox" name="has_study_form" value="1" checked class="w-4 h-4 text-primary-600 rounded mr-2"><span class="text-sm text-gray-700">Очная + Заочная формы</span></label>
         <label class="flex items-center cursor-pointer"><input type="checkbox" name="is_open" value="1" checked class="w-4 h-4 text-primary-600 rounded mr-2"><span class="text-sm text-gray-700">Открыть приём</span></label>
       </div>
       <div class="grid grid-cols-2 gap-4">
@@ -106,7 +103,6 @@ function openProgramModal(specId, title) {
   form.querySelector('[name="campaign_year"]').value = new Date().getFullYear();
   form.querySelector('[name="plan_count"]').value = 25;
   form.querySelector('[name="plan_count_paid"]').value = 10;
-  form.querySelector('[name="has_study_form"]').checked = true;
   form.querySelector('[name="is_open"]').checked = true;
   form.querySelector('[name="open_from"]').value = new Date().toISOString().split('T')[0];
   
@@ -141,7 +137,6 @@ function editProgramModal(prog, specTitle) {
   form.querySelector('[name="campaign_year"]').value = prog.year;
   form.querySelector('[name="plan_count"]').value = prog.plan;
   form.querySelector('[name="plan_count_paid"]').value = prog.plan_paid;
-  form.querySelector('[name="has_study_form"]').checked = !!prog.has_form;
   form.querySelector('[name="is_open"]').checked = !!prog.is_open;
   form.querySelector('[name="open_from"]').value = prog.from || '';
   form.querySelector('[name="open_until"]').value = prog.until || '';

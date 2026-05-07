@@ -98,13 +98,13 @@
               <div class="mt-0.5 text-xs text-gray-500">{{ $user->display_name }}</div>
             </td>
             <td class="px-4 py-3">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $user->role === 'admin' ? 'bg-secondary-100 text-secondary-700' : ($user->role === 'commission' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-700') }}">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $user->role === 'admin' ? 'bg-primary-100 text-primary-700' : ($user->role === 'commission' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-700') }}">
                 {{ $roleLabels[$user->role] ?? $user->role }}
               </span>
             </td>
             <td class="px-4 py-3 text-gray-600">{{ $user->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
             <td class="px-4 py-3">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $isActive ? 'bg-blue-100 text-blue-800' : 'bg-blue-100 text-blue-800' }}">
                 {{ $isActive ? 'Активен' : 'Деактивирован' }}
               </span>
             </td>
@@ -115,14 +115,14 @@
                   <form method="POST" action="{{ route('admin.users.toggle', $user) }}">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="text-xs font-medium {{ $isActive ? 'text-danger hover:text-red-700' : 'text-success hover:text-green-700' }}">
+                    <button type="submit" class="text-xs font-medium {{ $isActive ? 'text-danger hover:text-blue-700' : 'text-primary hover:text-blue-700' }}">
                       {{ $isActive ? 'Деактивировать' : 'Активировать' }}
                     </button>
                   </form>
                   <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Удалить пользователя?')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="text-xs font-medium text-danger hover:text-red-700">Удалить</button>
+                    <button type="submit" class="text-xs font-medium text-danger hover:text-blue-700">Удалить</button>
                   </form>
                 @else
                   <span class="text-xs text-gray-400">Это вы</span>
