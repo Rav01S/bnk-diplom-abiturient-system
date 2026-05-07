@@ -76,11 +76,15 @@ class RankingExportService
             ->values();
     }
 
-    /** @param Collection<int, Application> $applications */
     private function replaceSheetData(string $sheetXml, Program $program, string $fundingType, Collection $applications): string
     {
-        $lastRow = max(3, $applications->count() + 2);
-        $sheetData = '<sheetData>'.$this->titleRow($program, $fundingType).$this->headerRow().$this->dataRows($applications, $fundingType).'</sheetData>';
+        $lastRow = max(4, $applications->count() + 3);
+        $sheetData = '<sheetData>'
+            .$this->titleRow()
+            .$this->specialtyRow($program, $fundingType)
+            .$this->headerRow()
+            .$this->dataRows($applications, $fundingType)
+            .'</sheetData>';
 
         $sheetXml = preg_replace('/<dimension ref="[^"]+"\/>/', '<dimension ref="A1:K'.$lastRow.'"/>', $sheetXml, 1);
         $sheetXml = preg_replace('/<sheetData>.*<\/sheetData>/s', $sheetData, $sheetXml, 1);
@@ -88,11 +92,9 @@ class RankingExportService
         return $sheetXml;
     }
 
-    private function titleRow(Program $program, string $fundingType): string
+    private function titleRow(): string
     {
-        $funding = $fundingType === 'budget' ? 'Бюджет' : 'Хозрасчёт';
-        $title = $program->specialty->full_title.' - '.$funding;
-
+        $title = 'ГАПОУ «Бугурусланский нефтяной колледж» г. Бугуруслана. Ранжирование на '.date('d.m.Y').' по';
         $cells = $this->inlineCell('A', 1, $title, 3);
         foreach (range('B', 'K') as $column) {
             $cells .= '<c r="'.$column.'1" s="3"/>';
@@ -101,27 +103,39 @@ class RankingExportService
         return '<row r="1" spans="1:11" x14ac:dyDescent="0.25">'.$cells.'</row>';
     }
 
-    private function headerRow(): string
+    private function specialtyRow(Program $program, string $fundingType): string
     {
-        $headers = ['No', 'ФИО', 'Дата рождения', 'Б/Ж', 'Х/Р', 'Ср. балл', 'По 3-м предметам', 'Оригинал, Копия', 'Другая специальность', 'Телефон', 'Наждается в общежитии'];
-        $cells = '';
-
-        foreach ($headers as $index => $header) {
-            $cells .= $this->inlineCell($this->columnName($index + 1), 2, $header, 1);
+        $funding = $fundingType === 'budget' ? 'Бюджет' : 'Хозрасчёт';
+        $content = $program->specialty->full_title.' - '.$funding;
+        $cells = $this->inlineCell('A', 2, $content, 3);
+        foreach (range('B', 'K') as $column) {
+            $cells .= '<c r="'.$column.'2" s="3"/>';
         }
 
         return '<row r="2" spans="1:11" x14ac:dyDescent="0.25">'.$cells.'</row>';
+    }
+
+    private function headerRow(): string
+    {
+        $headers = ['No', 'ФИО', 'Дата рождения', 'Б/Ж', 'Х/Р', 'Ср. балл атт.', 'Балл по 3-м предм.', 'Оригинал, Копия', 'Другая специальность', 'Телефон', 'Общежитие'];
+        $cells = '';
+
+        foreach ($headers as $index => $header) {
+            $cells .= $this->inlineCell($this->columnName($index + 1), 3, $header, 1);
+        }
+
+        return '<row r="3" spans="1:11" x14ac:dyDescent="0.25">'.$cells.'</row>';
     }
 
     /** @param Collection<int, Application> $applications */
     private function dataRows(Collection $applications, string $fundingType): string
     {
         if ($applications->isEmpty()) {
-            return $this->emptyRow(3);
+            return $this->emptyRow(4);
         }
 
         return $applications
-            ->map(fn (Application $application, int $index) => $this->dataRow($application, $index + 3, $index + 1, $fundingType))
+            ->map(fn (Application $application, int $index) => $this->dataRow($application, $index + 4, $index + 1, $fundingType))
             ->implode('');
     }
 
