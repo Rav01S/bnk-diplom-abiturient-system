@@ -64,7 +64,7 @@
                     </span>
                     @if($app->is_benefit && $app->benefit_type)
                       <span class="ml-1 text-[8px] font-bold px-1 py-0.5 bg-amber-100 text-amber-700 rounded uppercase" title="{{ $app->benefit_label }}">
-                        Льгота
+                        {{ $app->benefit_badge_label }}
                       </span>
                     @endif
                   </div>

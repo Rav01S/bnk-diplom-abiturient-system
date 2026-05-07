@@ -196,6 +196,16 @@ class Application extends Model
         return $this->is_benefit && in_array($this->benefit_type, self::priorityBenefitTypes(), true);
     }
 
+    public function hasSvoBenefit(): bool
+    {
+        return $this->is_benefit && in_array($this->benefit_type, [self::BenefitSvoChildren, 'svo'], true);
+    }
+
+    public function getBenefitBadgeLabelAttribute(): string
+    {
+        return $this->hasSvoBenefit() ? 'СВО' : 'Льгота';
+    }
+
     /**
      * Можно ли редактировать заявление.
      */

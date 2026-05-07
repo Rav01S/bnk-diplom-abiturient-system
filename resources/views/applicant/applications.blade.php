@@ -24,7 +24,7 @@
         @forelse($applications as $app)
         <tr class="hover:bg-gray-50 transition">
           <td class="px-4 py-3 font-mono text-xs text-gray-600">#{{ $app->id }}</td>
-          <td class="px-4 py-3"><div class="font-medium text-gray-900 truncate max-w-xs">{{ $app->program->specialty->full_title }}</div><div class="text-xs text-gray-500">{{ $app->doc_type === 'original' ? 'Оригинал' : 'Копия' }}{{ $app->is_benefit ? ' • Льгота' : '' }}{{ $app->needs_dorm ? ' • Общежитие' : '' }}</div></td>
+          <td class="px-4 py-3"><div class="font-medium text-gray-900 truncate max-w-xs">{{ $app->program->specialty->full_title }}</div><div class="text-xs text-gray-500">{{ $app->doc_type === 'original' ? 'Оригинал' : 'Копия' }}{{ $app->is_benefit ? ' • '.$app->benefit_badge_label : '' }}{{ $app->needs_dorm ? ' • Общежитие' : '' }}</div></td>
           <td class="px-4 py-3 text-xs text-blue-700">{{ $app->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }}</td>
           <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ number_format($app->average_score, 2, ',', '') }}</td>
           <td class="px-4 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-xs font-medium text-gray-700">{{ $app->priority }}</span></td>
