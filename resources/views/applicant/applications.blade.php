@@ -19,7 +19,7 @@
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
-      <thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">№</th><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-left font-medium text-gray-500">Финансирование</th><th class="px-4 py-3 text-left font-medium text-gray-500">Средний балл</th><th class="px-4 py-3 text-left font-medium text-gray-500">Приоритет</th><th class="px-4 py-3 text-left font-medium text-gray-500">Статус</th><th class="px-4 py-3 text-left font-medium text-gray-500">Дата</th><th class="px-4 py-3 text-right font-medium text-gray-500">Действия</th></tr></thead>
+      <thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500">№</th><th class="px-4 py-3 text-left font-medium text-gray-500">Специальность</th><th class="px-4 py-3 text-left font-medium text-gray-500">Финансирование</th><th class="px-4 py-3 text-left font-medium text-gray-500">Средний балл по 3 предметам</th><th class="px-4 py-3 text-left font-medium text-gray-500">Приоритет</th><th class="px-4 py-3 text-left font-medium text-gray-500">Статус</th><th class="px-4 py-3 text-left font-medium text-gray-500">Дата</th><th class="px-4 py-3 text-right font-medium text-gray-500">Действия</th></tr></thead>
       <tbody class="divide-y divide-gray-200">
         @forelse($applications as $app)
         <tr class="hover:bg-gray-50 transition">

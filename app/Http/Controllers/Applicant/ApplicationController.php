@@ -138,7 +138,7 @@ class ApplicationController extends Controller
             ->whereHas('program', function ($query) use ($program) {
                 $query->where('specialty_id', $program->specialty_id);
             })
-            ->where('study_form', 'full_time')
+            ->where('study_form', $validated['study_form'])
             ->where('funding_type', $validated['funding_type'])
             ->exists();
 
@@ -154,7 +154,7 @@ class ApplicationController extends Controller
             $application->status = 'submitted';
             $application->revision = 1;
             $application->doc_type = $validated['doc_type'];
-            $application->study_form = 'full_time';
+            $application->study_form = $validated['study_form'];
             $application->funding_type = $validated['funding_type'];
             $application->is_benefit = $request->boolean('is_benefit');
             $application->benefit_type = $request->input('benefit_type');
@@ -203,7 +203,7 @@ class ApplicationController extends Controller
             })
             ->get()
             ->sortByDesc(fn ($app) => [
-                $app->is_benefit && $app->benefit_type === 'svo' ? 1 : 0,
+                $app->hasPriorityBenefit() ? 1 : 0,
                 (float) ($app->applicant->avg_cert_score ?? 0),
                 $app->average_score,
                 $app->is_benefit ? 1 : 0,
@@ -254,7 +254,7 @@ class ApplicationController extends Controller
             ->whereHas('program', function ($query) use ($program) {
                 $query->where('specialty_id', $program->specialty_id);
             })
-            ->where('study_form', 'full_time')
+            ->where('study_form', $validated['study_form'])
             ->where('funding_type', $validated['funding_type'])
             ->exists();
 
@@ -265,7 +265,7 @@ class ApplicationController extends Controller
         DB::transaction(function () use ($application, $validated, $applicant, $request): void {
             $application->priority = $validated['priority'];
             $application->doc_type = $validated['doc_type'];
-            $application->study_form = 'full_time';
+            $application->study_form = $validated['study_form'];
             $application->funding_type = $validated['funding_type'];
             $application->is_benefit = $request->boolean('is_benefit');
             $application->benefit_type = $request->input('benefit_type');

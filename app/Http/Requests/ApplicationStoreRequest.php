@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Application;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class ApplicationStoreRequest extends FormRequest
@@ -14,9 +16,11 @@ class ApplicationStoreRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'study_form' => 'full_time',
-        ]);
+        if (! $this->has('study_form')) {
+            $this->merge([
+                'study_form' => 'full_time',
+            ]);
+        }
     }
 
     /**
@@ -29,11 +33,11 @@ class ApplicationStoreRequest extends FormRequest
         return [
             'program_id' => ['required', 'exists:programs,id'],
             'priority' => ['required', 'integer', 'min:1', 'max:5'],
-            'study_form' => ['required', 'in:full_time'],
+            'study_form' => ['required', 'in:full_time,part_time'],
             'funding_type' => ['required', 'in:budget,paid'],
             'doc_type' => ['required', 'in:original,copy'],
             'is_benefit' => ['nullable', 'boolean'],
-            'benefit_type' => [$this->boolean('is_benefit') ? 'required' : 'nullable', 'string', 'max:50'],
+            'benefit_type' => [$this->boolean('is_benefit') ? 'required' : 'nullable', 'string', Rule::in(array_keys(Application::benefitOptions()))],
             'needs_dorm' => ['nullable', 'boolean'],
             'is_first_spo' => ['nullable', 'boolean'],
             'signed_doc_photo' => [$this->isMethod('post') ? 'required' : 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],

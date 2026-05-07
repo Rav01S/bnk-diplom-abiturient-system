@@ -50,7 +50,6 @@
 
 <form id="wizardForm" method="POST" action="{{ route('applicant.applications.store') }}" enctype="multipart/form-data" class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200" novalidate>
   @csrf
-  <input type="hidden" name="study_form" value="full_time">
 
   {{-- ШАГ 1: Выбор программы --}}
   <div class="wizard-step active p-4 sm:p-6" id="step1">
@@ -64,6 +63,25 @@
         </select>
         <p class="mt-1 text-xs text-gray-500">Код и название по ФГОС</p>
         <p id="programHint" class="mt-2 hidden text-xs text-blue-700"></p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Форма обучения</label>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
+            <span>
+              <span class="block text-sm font-medium text-gray-900">Очно</span>
+              <span class="block text-xs text-gray-500">Очная форма обучения</span>
+            </span>
+            <input type="radio" name="study_form" value="full_time" class="h-4 w-4 text-primary-600" {{ old('study_form', 'full_time') === 'full_time' ? 'checked' : '' }}>
+          </label>
+          <label class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
+            <span>
+              <span class="block text-sm font-medium text-gray-900">Заочно</span>
+              <span class="block text-xs text-gray-500">Заочная форма обучения</span>
+            </span>
+            <input type="radio" name="study_form" value="part_time" class="h-4 w-4 text-primary-600" {{ old('study_form') === 'part_time' ? 'checked' : '' }}>
+          </label>
+        </div>
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Финансирование</label>
@@ -100,13 +118,13 @@
   {{-- ШАГ 2: Данные (снапшот) --}}
   <div class="wizard-step p-4 sm:p-6" id="step2">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Шаг 2: Данные для заявления</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-primary-50 rounded-lg border border-primary-100">
-      <div><label class="block text-xs font-medium text-gray-500 mb-1">Фамилия</label><input type="text" value="{{ $applicant->last_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
-      <div><label class="block text-xs font-medium text-gray-500 mb-1">Имя</label><input type="text" value="{{ $applicant->first_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
-      <div><label class="block text-xs font-medium text-gray-500 mb-1">Отчество</label><input type="text" value="{{ $applicant->middle_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
-      <div><label class="block text-xs font-medium text-gray-500 mb-1">Дата рождения</label><input type="text" value="{{ $applicant->birth_date?->format('d.m.Y') }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
-      <div><label class="block text-xs font-medium text-gray-500 mb-1">Паспорт (серия/номер)</label><div class="flex space-x-2"><input type="text" value="{{ $applicant->passport_series }}" readonly class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"><input type="text" value="{{ $applicant->passport_number }}" readonly class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div></div>
-      <div><label class="block text-xs font-medium text-gray-500 mb-1">СНИЛС</label><input type="text" value="{{ $applicant->snils }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 rounded-lg border border-gray-200 bg-[#f3f4f6] p-4">
+      <div><label class="block text-xs font-medium text-[#6b7280] mb-1">Фамилия</label><input type="text" value="{{ $applicant->last_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-[#f9fafb]"></div>
+      <div><label class="block text-xs font-medium text-[#6b7280] mb-1">Имя</label><input type="text" value="{{ $applicant->first_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-[#f9fafb]"></div>
+      <div><label class="block text-xs font-medium text-[#6b7280] mb-1">Отчество</label><input type="text" value="{{ $applicant->middle_name }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-[#f9fafb]"></div>
+      <div><label class="block text-xs font-medium text-[#6b7280] mb-1">Дата рождения</label><input type="text" value="{{ $applicant->birth_date?->format('d.m.Y') }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-[#f9fafb]"></div>
+      <div><label class="block text-xs font-medium text-[#6b7280] mb-1">Паспорт (серия/номер)</label><div class="flex space-x-2"><input type="text" value="{{ $applicant->passport_series }}" readonly class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-[#f9fafb]"><input type="text" value="{{ $applicant->passport_number }}" readonly class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-[#f9fafb]"></div></div>
+      <div><label class="block text-xs font-medium text-[#6b7280] mb-1">СНИЛС</label><input type="text" value="{{ $applicant->snils }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-[#f9fafb]"></div>
     </div>
 
     <h4 class="font-medium text-gray-900 mb-3">Оценки из аттестата (по 5-балльной шкале)</h4>
@@ -144,9 +162,9 @@
               <span class="ml-2 text-sm">Есть льготные права</span>
             </label>
             <select id="benefitType" name="benefit_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm {{ old('is_benefit') ? 'bg-white' : 'bg-gray-50 opacity-50' }}" {{ old('is_benefit') ? 'required' : 'disabled' }}>
-              <option value="olympiad" {{ old('benefit_type')==='olympiad'?'selected':'' }}>Олимпиада</option>
-              <option value="disability" {{ old('benefit_type')==='disability'?'selected':'' }}>Инвалидность</option>
-              <option value="svo" {{ old('benefit_type')==='svo'?'selected':'' }}>СВО</option>
+              @foreach(\App\Models\Application::benefitOptions() as $value => $label)
+                <option value="{{ $value }}" @selected(old('benefit_type') === $value)>{{ $label }}</option>
+              @endforeach
             </select>
           </div>
         </div>
@@ -272,6 +290,17 @@ document.addEventListener('DOMContentLoaded', function() {
     input.addEventListener('change', updateFundingState);
   });
 
+  function updateStudyFormState() {
+    document.querySelectorAll('.study-form-option').forEach(label => {
+      const input = label.querySelector('input[name="study_form"]');
+      label.classList.toggle('selected', !!input?.checked);
+    });
+  }
+
+  document.querySelectorAll('input[name="study_form"]').forEach(input => {
+    input.addEventListener('change', updateStudyFormState);
+  });
+
   // Program select → enable next, populate subjects
   programSelect?.addEventListener('change', function() {
     step1Next.disabled = !this.value;
@@ -281,12 +310,16 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         const subjects = JSON.parse(opt.dataset.subjects || '[]');
         subjectsContainer.innerHTML = subjects.map((subj, i) =>
-          '<div class="flex items-center space-x-3">' +
-          '<span class="w-32 text-sm text-gray-700">' + subj + '</span>' +
+          '<div class="score-row flex items-start space-x-3">' +
+          '<span class="w-32 pt-2 text-sm text-gray-700">' + subj + '</span>' +
           '<input type="hidden" name="scores[' + i + '][subject_name]" value="' + subj + '">' +
-          '<input type="number" name="scores[' + i + '][score]" min="2" max="5" step="0.5" placeholder="2-5" required class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-600">' +
-          '<span class="text-xs text-gray-400">балл</span></div>'
+          '<div class="flex-1"><input type="text" name="scores[' + i + '][score]" inputmode="decimal" maxlength="3" placeholder="2-5" required class="score-input w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-600 focus:border-primary-600"></div>' +
+          '<span class="pt-2 text-xs text-gray-400">балл</span></div>'
         ).join('');
+        subjectsContainer.querySelectorAll('.score-input').forEach(input => {
+          input.addEventListener('input', () => maskScoreInput(input));
+          input.addEventListener('blur', () => finalizeScoreInput(input));
+        });
       } catch(e) {}
     }
   });
@@ -330,16 +363,68 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  function maskScoreInput(input) {
+    let value = input.value.replace(',', '.').replace(/[^\d.]/g, '');
+
+    if (value === '') {
+      input.value = '';
+      return;
+    }
+
+    const base = value.match(/[2-5]/)?.[0] || '';
+
+    if (base === '') {
+      input.value = '';
+      return;
+    }
+
+    const hasDot = value.includes('.');
+    const decimal = value.split('.')[1]?.charAt(0) || '';
+
+    if (!hasDot) {
+      input.value = base;
+      return;
+    }
+
+    if (base === '5') {
+      input.value = decimal === '0' ? '5.0' : '5';
+      return;
+    }
+
+    input.value = decimal === '0' || decimal === '5' ? base + '.' + decimal : base + '.';
+  }
+
+  function finalizeScoreInput(input) {
+    maskScoreInput(input);
+
+    if (input.value.endsWith('.')) {
+      input.value = input.value.slice(0, -1);
+    }
+  }
+
+  function areScoresFilled() {
+    const inputs = document.querySelectorAll('#subjectsContainer .score-input');
+    let firstInvalid = null;
+    let allFilled = true;
+
+    inputs.forEach(input => {
+      finalizeScoreInput(input);
+
+      if (input.value === '') {
+        allFilled = false;
+        firstInvalid ??= input;
+      }
+    });
+
+    firstInvalid?.focus();
+
+    return allFilled;
+  }
+
   // Wizard navigation
   function goToStep(step) {
-    if (step > currentStep && currentStep === 2) {
-      let allValid = true;
-      document.querySelectorAll('#subjectsContainer input[type="number"]').forEach(inp => {
-        const v = parseFloat(inp.value);
-        if (isNaN(v) || v < 2 || v > 5) { allValid = false; inp.classList.add('border-blue-500'); }
-        else { inp.classList.remove('border-blue-500'); }
-      });
-      if (!allValid) { alert('Все оценки должны быть в диапазоне от 2 до 5'); return; }
+    if (step > currentStep && currentStep === 2 && !areScoresFilled()) {
+      return;
     }
     currentStep = step;
     document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
@@ -359,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
       let scoreHtml = '';
       document.querySelectorAll('#subjectsContainer > div').forEach(div => {
         const name = div.querySelector('input[type="hidden"]')?.value || '';
-        const val = div.querySelector('input[type="number"]')?.value || '—';
+        const val = div.querySelector('.score-input')?.value || '—';
         scoreHtml += '• ' + name + ': ' + val + '<br>';
       });
       document.getElementById('previewScores').innerHTML = scoreHtml;
@@ -415,6 +500,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Trigger initial state
   if (programSelect?.value) programSelect.dispatchEvent(new Event('change'));
+  updateStudyFormState();
   updateFundingState();
 });
 </script>

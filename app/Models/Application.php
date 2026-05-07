@@ -9,6 +9,26 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Application extends Model
 {
+    public const BenefitOrphans = 'orphans';
+
+    public const BenefitWithoutParentalCare = 'without_parental_care';
+
+    public const BenefitDisabledChildren = 'disabled_children';
+
+    public const BenefitDisabledGroupOne = 'disabled_group_one';
+
+    public const BenefitDisabledGroupTwo = 'disabled_group_two';
+
+    public const BenefitDisabledFromChildhood = 'disabled_from_childhood';
+
+    public const BenefitMilitaryInjuryDisability = 'military_injury_disability';
+
+    public const BenefitMilitaryDiseaseDisability = 'military_disease_disability';
+
+    public const BenefitCombatVeterans = 'combat_veterans';
+
+    public const BenefitSvoChildren = 'svo_children';
+
     /** @var array<int, string> */
     protected $fillable = [
         'applicant_id',
@@ -119,6 +139,43 @@ class Application extends Model
         }
 
         return round($scores->avg('score'), 2);
+    }
+
+    /** @return array<string, string> */
+    public static function benefitOptions(): array
+    {
+        return [
+            self::BenefitOrphans => 'дети-сироты',
+            self::BenefitWithoutParentalCare => 'дети без попечения родителей',
+            self::BenefitDisabledChildren => 'дети-инвалиды',
+            self::BenefitDisabledGroupOne => 'инвалиды I группы',
+            self::BenefitDisabledGroupTwo => 'инвалиды II группы',
+            self::BenefitDisabledFromChildhood => 'инвалиды с детства',
+            self::BenefitMilitaryInjuryDisability => 'инвалиды вследствие военной травмы',
+            self::BenefitMilitaryDiseaseDisability => 'инвалиды вследствие заболевания полученного в период прохождения военной службы',
+            self::BenefitCombatVeterans => 'ветераны боевых действий',
+            self::BenefitSvoChildren => 'дети участников специальной военной операции',
+        ];
+    }
+
+    public static function benefitLabelFor(?string $benefitType): ?string
+    {
+        return self::benefitOptions()[$benefitType] ?? match ($benefitType) {
+            'olympiad' => 'Олимпиада',
+            'disability' => 'Инвалидность',
+            'svo' => 'СВО',
+            default => $benefitType,
+        };
+    }
+
+    public function getBenefitLabelAttribute(): ?string
+    {
+        return self::benefitLabelFor($this->benefit_type);
+    }
+
+    public function hasPriorityBenefit(): bool
+    {
+        return $this->is_benefit && $this->benefit_type === self::BenefitCombatVeterans;
     }
 
     /**

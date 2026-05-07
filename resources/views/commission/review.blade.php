@@ -6,9 +6,9 @@
 @section('content')
 <div class="mb-4"><a href="{{ route('commission.queue', request()->query()) }}" class="text-sm text-gray-600 hover:text-gray-900">← К очереди</a></div>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-  {{-- Левая панель: снапшот + решение --}}
+  {{-- Левая панель: данные заявления + решение --}}
   <div class="lg:col-span-7 bg-white rounded-lg shadow-sm border border-gray-200 overflow-y-auto p-4 sm:p-5">
-    <h2 class="text-lg font-medium text-gray-900 mb-4">Снапшот заявления</h2>
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Данные заявления</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4 p-4 bg-gray-50 rounded border border-gray-200">
       <div><p class="text-gray-500 text-xs">ФИО</p><p class="font-medium">{{ $application->app_full_name }}</p></div>
       <div><p class="text-gray-500 text-xs">Дата рождения</p><p class="font-medium">{{ $application->app_birth_date?->format('d.m.Y') ?? '—' }}</p></div>
@@ -19,7 +19,7 @@
         <div><p class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Особые права (Льгота)</p>
         <p class="font-bold text-gray-900">
           @if($application->is_benefit)
-            {{ $application->benefit_type === 'olympiad' ? 'Олимпиада' : ($application->benefit_type === 'disability' ? 'Инвалидность' : ($application->benefit_type === 'svo' ? 'СВО' : $application->benefit_type)) }}
+            {{ $application->benefit_label }}
           @else
             Нет
           @endif

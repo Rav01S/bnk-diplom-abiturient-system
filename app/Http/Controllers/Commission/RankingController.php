@@ -42,7 +42,7 @@ class RankingController extends Controller
                 ->byStatus('approved')
                 ->get()
                 ->sortByDesc(fn ($app) => [
-                    $app->is_benefit && $app->benefit_type === 'svo' ? 1 : 0,
+                    $app->hasPriorityBenefit() ? 1 : 0,
                     (float) $app->applicant->avg_cert_score,
                     $app->average_score,
                     $app->is_benefit ? 1 : 0,
@@ -67,7 +67,7 @@ class RankingController extends Controller
             ->byStatus('approved')
             ->get()
             ->sortByDesc(fn ($app) => [
-                $app->is_benefit && $app->benefit_type === 'svo' ? 1 : 0,
+                $app->hasPriorityBenefit() ? 1 : 0,
                 (float) $app->applicant->avg_cert_score,
                 $app->average_score,
                 $app->is_benefit ? 1 : 0,
@@ -96,8 +96,7 @@ class RankingController extends Controller
                 // ФИО + Льгота
                 $nameWithBenefit = $app->app_full_name;
                 if ($app->is_benefit && $app->benefit_type) {
-                    $benefitLabel = $app->benefit_type === 'olympiad' ? 'Олимпиада' : ($app->benefit_type === 'disability' ? 'Инвалидность' : ($app->benefit_type === 'svo' ? 'СВО' : $app->benefit_type));
-                    $nameWithBenefit .= ' ('.$benefitLabel.')';
+                    $nameWithBenefit .= ' ('.$app->benefit_label.')';
                 }
                 $sheet->setCellValue('B'.$row, $nameWithBenefit);
 
@@ -106,7 +105,7 @@ class RankingController extends Controller
                 $sheet->setCellValue('E'.$row, $app->funding_type === 'paid' ? '+' : ''); // Х/Р
 
                 // Средний балл аттестата (F)
-                if ($app->is_benefit && $app->benefit_type === 'svo') {
+                if ($app->hasPriorityBenefit()) {
                     $sheet->setCellValue('F'.$row, '6,00 ('.number_format($app->applicant->avg_cert_score, 2, ',', '').')');
                 } else {
                     $sheet->setCellValue('F'.$row, $app->applicant->avg_cert_score ? number_format($app->applicant->avg_cert_score, 2, ',', '') : '');

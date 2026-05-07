@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-6">
   <h2 class="text-xl font-semibold text-gray-900 mb-1">Добро пожаловать, {{ auth()->user()->applicant->first_name ?? 'Абитуриент' }}! 👋</h2>
-  <p class="text-gray-500 text-sm">Приёмная комиссия ГАПОУ Бугурусланский нефтяной колледж • {{ date('Y') }} • Очно • Бюджет / Хозрасчёт</p>
+  <p class="text-gray-500 text-sm">Приёмная комиссия ГАПОУ Бугурусланский нефтяной колледж • {{ date('Y') }} • Очно / Заочно • Бюджет / Хозрасчёт</p>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
