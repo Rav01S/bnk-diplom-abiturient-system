@@ -35,12 +35,13 @@
       </div>
     </div>
 
+    @if($application->status === 'approved')
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-medium text-gray-900">Позиция в рейтинге</h3>
         <span class="text-xs text-gray-500">{{ $application->funding_type === 'budget' ? 'Бюджет' : 'Хозрасчёт' }} • Мест: {{ $application->funding_type === 'budget' ? $application->program->plan_count : $application->program->plan_count_paid }}</span>
       </div>
-      
+
       <div class="overflow-x-auto -mx-4 sm:mx-0">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold">
@@ -87,7 +88,7 @@
           </tbody>
         </table>
       </div>
-      @php 
+      @php
         $myRank = $ranking->search(fn($item) => $item->id === $application->id) + 1;
         $plan = $application->funding_type === 'budget' ? $application->program->plan_count : $application->program->plan_count_paid;
       @endphp
@@ -99,6 +100,17 @@
         @endif
       </div>
     </div>
+    @else
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-medium text-gray-900">Позиция в рейтинге</h3>
+      </div>
+      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-500">
+        <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Рейтинг будет доступен после того, как заявление будет принято комиссией.
+      </div>
+    </div>
+    @endif
   </div>
 
   <div class="space-y-4">

@@ -194,21 +194,22 @@ class ApplicationController extends Controller
         $this->authorizeApplicant($application);
         $application->load('program.specialty', 'scores', 'applicant');
 
-        $ranking = Application::with(['scores', 'applicant'])
-            ->where('program_id', $application->program_id)
-            ->where('funding_type', $application->funding_type)
-            ->where(function ($query) use ($application) {
-                $query->where('status', 'approved')
-                    ->orWhere('id', $application->id);
-            })
-            ->get()
-            ->sortByDesc(fn ($app) => [
-                $app->hasPriorityBenefit() ? 1 : 0,
-                (float) ($app->applicant->avg_cert_score ?? 0),
-                $app->average_score,
-                $app->is_benefit ? 1 : 0,
-            ])
-            ->values();
+        /** Рейтинг показываем только для принятых заявлений. */
+        $ranking = collect();
+        if ($application->status === 'approved') {
+            $ranking = Application::with(['scores', 'applicant'])
+                ->where('program_id', $application->program_id)
+                ->where('funding_type', $application->funding_type)
+                ->byStatus('approved')
+                ->get()
+                ->sortByDesc(fn ($app) => [
+                    $app->hasPriorityBenefit() ? 1 : 0,
+                    (float) ($app->applicant->avg_cert_score ?? 0),
+                    $app->average_score,
+                    $app->is_benefit ? 1 : 0,
+                ])
+                ->values();
+        }
 
         return view('applicant.application-view', compact('application', 'ranking'));
     }
