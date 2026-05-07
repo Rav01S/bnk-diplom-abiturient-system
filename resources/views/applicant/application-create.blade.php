@@ -58,7 +58,7 @@
       <div><label for="program_id" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Специальность</label>
         <select id="program_id" name="program_id" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white">
           <option value="">Выберите специальность...</option>
-          @foreach($programs as $prog)<option value="{{ $prog->id }}" data-accepting="1" data-plan-budget="{{ $prog->plan_count }}" data-plan-paid="{{ $prog->plan_count_paid }}" data-subjects='@json($prog->specialty->subjects)' @selected((int) old('program_id') === $prog->id)>{{ $prog->specialty->full_title }}</option>@endforeach
+          @foreach($programs as $prog)<option value="{{ $prog->id }}" data-accepting="1" data-has-study-form="{{ $prog->has_study_form ? 1 : 0 }}" data-plan-budget="{{ $prog->plan_count }}" data-plan-paid="{{ $prog->plan_count_paid }}" data-subjects='@json($prog->specialty->subjects)' @selected((int) old('program_id') === $prog->id)>{{ $prog->specialty->full_title }}</option>@endforeach
           @foreach(($specialtiesWithoutPrograms ?? collect()) as $specialty)<option value="" disabled>{{ $specialty->full_title }} — программа приёма не создана</option>@endforeach
         </select>
         <p class="mt-1 text-xs text-gray-500">Код и название по ФГОС</p>
@@ -67,14 +67,14 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Форма обучения</label>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
+          <label class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600" data-study-form-option="full_time">
             <span>
               <span class="block text-sm font-medium text-gray-900">Очно</span>
               <span class="block text-xs text-gray-500">Очная форма обучения</span>
             </span>
             <input type="radio" name="study_form" value="full_time" class="h-4 w-4 text-primary-600" {{ old('study_form', 'full_time') === 'full_time' ? 'checked' : '' }}>
           </label>
-          <label class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
+          <label class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600" data-study-form-option="part_time">
             <span>
               <span class="block text-sm font-medium text-gray-900">Заочно</span>
               <span class="block text-xs text-gray-500">Заочная форма обучения</span>
@@ -101,7 +101,6 @@
             <input id="paidInput" type="radio" name="funding_type" value="paid" class="h-4 w-4 text-primary-600" {{ old('funding_type') === 'paid' ? 'checked' : '' }}>
           </label>
         </div>
-        <p id="fundingHint" class="mt-2 hidden text-xs text-blue-700"></p>
       </div>
       <div><label for="priorityInput" class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Приоритет заявления (1–5)</label>
         <select id="priorityInput" name="priority" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white">
@@ -241,7 +240,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const budgetInput = document.getElementById('budgetInput');
   const paidOption = document.getElementById('paidOption');
   const paidInput = document.getElementById('paidInput');
-  const fundingHint = document.getElementById('fundingHint');
   let currentStep = 1;
 
   // Priority range
@@ -261,14 +259,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (budgetInput?.checked && !hasBudget && hasPaid) paidInput.checked = true;
     if (paidInput?.checked && !hasPaid && hasBudget) budgetInput.checked = true;
-
-    const messages = [];
-    if (selected?.value && !hasBudget) messages.push('бюджет недоступен');
-    if (selected?.value && !hasPaid) messages.push('хозрасчёт недоступен');
-    if (fundingHint) {
-      fundingHint.textContent = messages.length ? 'Для выбранной программы ' + messages.join(', ') + '.' : '';
-      fundingHint.classList.toggle('hidden', messages.length === 0);
-    }
 
     document.querySelectorAll('.funding-option').forEach(label => {
       const input = label.querySelector('input[name="funding_type"]');
@@ -291,6 +281,23 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function updateStudyFormState() {
+    const selected = programSelect?.options[programSelect.selectedIndex];
+    const allowsPartTime = selected?.dataset.hasStudyForm === '1';
+
+    document.querySelectorAll('[data-study-form-option="part_time"]').forEach(label => {
+      const input = label.querySelector('input[name="study_form"]');
+
+      if (input) {
+        input.disabled = !!selected?.value && !allowsPartTime;
+        if (input.disabled && input.checked) {
+          const fullTimeInput = document.querySelector('input[name="study_form"][value="full_time"]');
+          if (fullTimeInput) fullTimeInput.checked = true;
+        }
+      }
+
+      label.classList.toggle('disabled', !!selected?.value && !allowsPartTime);
+    });
+
     document.querySelectorAll('.study-form-option').forEach(label => {
       const input = label.querySelector('input[name="study_form"]');
       label.classList.toggle('selected', !!input?.checked);
@@ -305,6 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
   programSelect?.addEventListener('change', function() {
     step1Next.disabled = !this.value;
     updateFundingState();
+    updateStudyFormState();
     if (this.value) {
       const opt = this.options[this.selectedIndex];
       try {

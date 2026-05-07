@@ -86,19 +86,25 @@ class SpecialtyController extends Controller
 
     public function storeProgram(Request $request, Specialty $specialty): RedirectResponse
     {
-        $validated = $request->validate([
-            'campaign_year' => [
-                'required', 'integer', 'min:2020', 'max:2030',
-                Rule::unique('programs')->where('specialty_id', $specialty->id),
+        $validated = $request->validate(
+            [
+                'campaign_year' => [
+                    'required', 'integer', 'min:2020', 'max:2030',
+                    Rule::unique('programs')->where('specialty_id', $specialty->id),
+                ],
+                'plan_count' => ['required', 'integer', 'min:0'],
+                'plan_count_paid' => ['required', 'integer', 'min:0'],
+                'has_study_form' => ['required', 'boolean'],
+                'is_open' => ['nullable', 'boolean'],
+                'open_from' => ['nullable', 'date'],
+                'open_until' => ['nullable', 'date', 'after_or_equal:open_from'],
             ],
-            'plan_count' => ['required', 'integer', 'min:0'],
-            'plan_count_paid' => ['required', 'integer', 'min:0'],
-            'is_open' => ['nullable', 'boolean'],
-            'open_from' => ['nullable', 'date'],
-            'open_until' => ['nullable', 'date', 'after_or_equal:open_from'],
-        ]);
+            [
+                'campaign_year.unique' => 'Программа на этот год уже создана.',
+            ],
+        );
 
-        $validated['has_study_form'] = false;
+        $validated['has_study_form'] = $request->boolean('has_study_form');
         $validated['is_open'] = $request->boolean('is_open');
 
         $specialty->programs()->create($validated);
@@ -108,19 +114,25 @@ class SpecialtyController extends Controller
 
     public function updateProgram(Request $request, Program $program): RedirectResponse
     {
-        $validated = $request->validate([
-            'campaign_year' => [
-                'required', 'integer', 'min:2020', 'max:2030',
-                Rule::unique('programs')->where('specialty_id', $program->specialty_id)->ignore($program->id),
+        $validated = $request->validate(
+            [
+                'campaign_year' => [
+                    'required', 'integer', 'min:2020', 'max:2030',
+                    Rule::unique('programs')->where('specialty_id', $program->specialty_id)->ignore($program->id),
+                ],
+                'plan_count' => ['required', 'integer', 'min:0'],
+                'plan_count_paid' => ['required', 'integer', 'min:0'],
+                'has_study_form' => ['required', 'boolean'],
+                'is_open' => ['nullable', 'boolean'],
+                'open_from' => ['nullable', 'date'],
+                'open_until' => ['nullable', 'date', 'after_or_equal:open_from'],
             ],
-            'plan_count' => ['required', 'integer', 'min:0'],
-            'plan_count_paid' => ['required', 'integer', 'min:0'],
-            'is_open' => ['nullable', 'boolean'],
-            'open_from' => ['nullable', 'date'],
-            'open_until' => ['nullable', 'date', 'after_or_equal:open_from'],
-        ]);
+            [
+                'campaign_year.unique' => 'Программа на этот год уже создана.',
+            ],
+        );
 
-        $validated['has_study_form'] = false;
+        $validated['has_study_form'] = $request->boolean('has_study_form');
         $validated['is_open'] = $request->boolean('is_open');
 
         $program->update($validated);

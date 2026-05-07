@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Application;
+use App\Models\Program;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -89,9 +90,13 @@ class ApplicationStoreRequest extends FormRequest
                 }
             }
 
-            $program = \App\Models\Program::find($this->input('program_id'));
+            $program = Program::find($this->input('program_id'));
             if (! $program) {
                 return;
+            }
+
+            if ($this->input('study_form') === 'part_time' && ! $program->has_study_form) {
+                $validator->errors()->add('study_form', 'Для выбранной программы доступна только очная форма обучения.');
             }
 
             if ($this->input('funding_type') === 'budget' && $program->plan_count <= 0) {
