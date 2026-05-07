@@ -120,7 +120,7 @@ class RankingController extends Controller
                 $sheet->setCellValue('E'.$row, $app->funding_type === 'paid' ? '+' : '');
 
                 // Средний балл аттестата (F)
-                if ($app->is_benefit && $app->benefit_type === 'svo') {
+                if ($app->hasPriorityBenefit()) {
                     $sheet->setCellValue('F'.$row, '6,00 ('.number_format($app->applicant->avg_cert_score ?? 0, 2, ',', '').')');
                 } else {
                     $sheet->setCellValue('F'.$row, $app->applicant->avg_cert_score ? (float) $app->applicant->avg_cert_score : '');

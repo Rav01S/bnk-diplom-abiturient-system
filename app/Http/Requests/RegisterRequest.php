@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
@@ -33,8 +34,8 @@ class RegisterRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:100', 'regex:/^[\p{L}\s-]+$/u'],
             'first_name' => ['required', 'string', 'max:100', 'regex:/^[\p{L}\s-]+$/u'],
             'middle_name' => ['nullable', 'string', 'max:100', 'regex:/^[\p{L}\s-]+$/u'],
-            'email' => ['required', 'email:rfc', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'email' => ['required', 'email:rfc', 'max:255', 'regex:/^[^\s@]+@[^\s@]+\.[A-Za-zА-Яа-яЁё]{2,}$/u', Rule::unique('users', 'email')],
+            'password' => ['required', 'string', 'confirmed', Password::min(8)->numbers()],
             'consent' => ['accepted'],
         ];
     }
@@ -52,9 +53,11 @@ class RegisterRequest extends FormRequest
             'middle_name.regex' => 'Отчество может содержать только буквы, пробелы и дефис.',
             'email.required' => 'Укажите email.',
             'email.email' => 'Укажите корректный email.',
+            'email.regex' => 'Email должен содержать домен и зону, например user@example.com.',
             'email.unique' => 'Этот email уже зарегистрирован.',
             'password.required' => 'Укажите пароль.',
             'password.min' => 'Пароль минимум 8 символов.',
+            'password.numbers' => 'Пароль должен содержать хотя бы одну цифру.',
             'password.confirmed' => 'Пароли не совпадают.',
             'consent.accepted' => 'Необходимо согласие на обработку данных.',
         ];

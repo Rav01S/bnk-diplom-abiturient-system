@@ -158,6 +158,24 @@ class Application extends Model
         ];
     }
 
+    /** @return array<int, string> */
+    public static function priorityBenefitTypes(): array
+    {
+        return [
+            self::BenefitOrphans,
+            self::BenefitWithoutParentalCare,
+            self::BenefitDisabledChildren,
+            self::BenefitDisabledGroupOne,
+            self::BenefitDisabledGroupTwo,
+            self::BenefitDisabledFromChildhood,
+            self::BenefitMilitaryInjuryDisability,
+            self::BenefitMilitaryDiseaseDisability,
+            self::BenefitCombatVeterans,
+            self::BenefitSvoChildren,
+            'svo',
+        ];
+    }
+
     public static function benefitLabelFor(?string $benefitType): ?string
     {
         return self::benefitOptions()[$benefitType] ?? match ($benefitType) {
@@ -175,7 +193,7 @@ class Application extends Model
 
     public function hasPriorityBenefit(): bool
     {
-        return $this->is_benefit && $this->benefit_type === self::BenefitCombatVeterans;
+        return $this->is_benefit && in_array($this->benefit_type, self::priorityBenefitTypes(), true);
     }
 
     /**

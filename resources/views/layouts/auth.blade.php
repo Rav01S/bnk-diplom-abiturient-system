@@ -75,5 +75,6 @@
 </head>
 <body class="bg-primary-600 min-h-screen flex items-center justify-center p-4">
   @yield('content')
+  @yield('scripts')
 </body>
 </html>
