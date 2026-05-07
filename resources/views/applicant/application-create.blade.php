@@ -6,23 +6,23 @@
 .wizard-step { display: none; }
 .wizard-step.active { display: block; }
 .step-dot { transition: all 0.2s; }
-.step-dot.active { background-color: #0b5f56; border-color: #0b5f56; color: white; }
-.step-dot.completed { background-color: #059669; border-color: #059669; color: white; }
+.step-dot.active { background-color: #1d4ed8; border-color: #1d4ed8; color: white; }
+.step-dot.completed { background-color: #2563eb; border-color: #2563eb; color: white; }
 .print-preview { font-family: 'Times New Roman', serif; font-size: 14px; line-height: 1.5; }
 .photo-preview { min-height: 120px; }
-.choice-option.selected { border-color: #0b5f56; background-color: #edf7f4; }
-.choice-option.disabled { cursor: not-allowed; opacity: 0.55; background-color: #f8fafc; }
+.choice-option.selected { border-color: #1d4ed8; background-color: #eff6ff; }
+.choice-option.disabled { cursor: not-allowed; opacity: 0.55; background-color: #f8fbff; }
 @endsection
 @section('content')
 @if($limitReached)
-<div class="bg-white rounded-lg shadow-sm border border-orange-200 p-8 text-center">
-  <svg class="mx-auto w-16 h-16 text-orange-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+<div class="bg-white rounded-lg shadow-sm border border-blue-200 p-8 text-center">
+  <svg class="mx-auto w-16 h-16 text-blue-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
   <h2 class="text-xl font-semibold text-gray-900 mb-2">Лимит достигнут</h2>
   <p class="text-gray-600">Вы подали максимальное количество заявлений (5). Отмените одно из текущих, чтобы подать новое.</p>
 </div>
 @elseif($profileIncomplete ?? false)
-<div class="bg-white rounded-lg shadow-sm border border-yellow-200 p-8 text-center">
-  <svg class="mx-auto mb-4 h-16 w-16 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>
+<div class="bg-white rounded-lg shadow-sm border border-blue-200 p-8 text-center">
+  <svg class="mx-auto mb-4 h-16 w-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>
   <h2 class="mb-2 text-xl font-semibold text-gray-900">Заполните профиль</h2>
   <p class="mx-auto mb-6 max-w-xl text-gray-600">Подача заявления доступна только после заполнения обязательных данных профиля: телефон, СНИЛС, паспортные данные, образование, средний балл аттестата, фото паспорта и фото СНИЛС.</p>
   <a href="{{ route('applicant.profile') }}" class="inline-flex items-center rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-primary-700">Перейти к профилю</a>
@@ -50,6 +50,7 @@
 
 <form id="wizardForm" method="POST" action="{{ route('applicant.applications.store') }}" enctype="multipart/form-data" class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200" novalidate>
   @csrf
+  <input type="hidden" name="study_form" value="full_time">
 
   {{-- ШАГ 1: Выбор программы --}}
   <div class="wizard-step active p-4 sm:p-6" id="step1">
@@ -58,31 +59,11 @@
       <div><label for="program_id" class="block text-sm font-medium text-gray-700 mb-1" aria-required="true">Специальность</label>
         <select id="program_id" name="program_id" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white">
           <option value="">Выберите специальность...</option>
-          @foreach($programs as $prog)<option value="{{ $prog->id }}" data-accepting="1" data-has-form="{{ $prog->has_study_form ? '1' : '0' }}" data-plan-budget="{{ $prog->plan_count }}" data-plan-paid="{{ $prog->plan_count_paid }}" data-subjects='@json($prog->specialty->subjects)' @selected((int) old('program_id') === $prog->id)>{{ $prog->specialty->full_title }}{{ !$prog->has_study_form ? ' (только очная)' : '' }}</option>@endforeach
+          @foreach($programs as $prog)<option value="{{ $prog->id }}" data-accepting="1" data-plan-budget="{{ $prog->plan_count }}" data-plan-paid="{{ $prog->plan_count_paid }}" data-subjects='@json($prog->specialty->subjects)' @selected((int) old('program_id') === $prog->id)>{{ $prog->specialty->full_title }}</option>@endforeach
           @foreach(($specialtiesWithoutPrograms ?? collect()) as $specialty)<option value="" disabled>{{ $specialty->full_title }} — программа приёма не создана</option>@endforeach
         </select>
         <p class="mt-1 text-xs text-gray-500">Код и название по ФГОС</p>
-        <p id="programHint" class="mt-2 hidden text-xs text-amber-700"></p>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Форма обучения</label>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
-            <span>
-              <span class="block text-sm font-medium text-gray-900">Очная</span>
-              <span class="block text-xs text-gray-500">Обучение в колледже по расписанию</span>
-            </span>
-            <input type="radio" name="study_form" value="full_time" class="h-4 w-4 text-primary-600" {{ old('study_form', 'full_time') === 'full_time' ? 'checked' : '' }}>
-          </label>
-          <label id="partTimeOption" class="study-form-option choice-option flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 transition hover:border-primary-600">
-            <span>
-              <span class="block text-sm font-medium text-gray-900">Заочная</span>
-              <span class="block text-xs text-gray-500">Обучение с сессиями и самостоятельной работой</span>
-            </span>
-            <input id="partTimeInput" type="radio" name="study_form" value="part_time" class="h-4 w-4 text-primary-600" {{ old('study_form') === 'part_time' ? 'checked' : '' }}>
-          </label>
-        </div>
-        <p id="studyFormHint" class="mt-2 hidden text-xs text-amber-700">Для выбранной программы доступна только очная форма обучения.</p>
+        <p id="programHint" class="mt-2 hidden text-xs text-blue-700"></p>
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Финансирование</label>
@@ -102,7 +83,7 @@
             <input id="paidInput" type="radio" name="funding_type" value="paid" class="h-4 w-4 text-primary-600" {{ old('funding_type') === 'paid' ? 'checked' : '' }}>
           </label>
         </div>
-        <p id="fundingHint" class="mt-2 hidden text-xs text-amber-700"></p>
+        <p id="fundingHint" class="mt-2 hidden text-xs text-blue-700"></p>
       </div>
       <div><label for="priorityInput" class="block text-sm font-medium text-gray-700 mb-2" aria-required="true">Приоритет заявления (1–5)</label>
         <select id="priorityInput" name="priority" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition focus-ring bg-white">
@@ -211,7 +192,7 @@
       </div>
       <p class="mt-3 text-sm text-gray-500">Убедитесь, что подпись и дата видны чётко. Максимальный размер: 10 МБ.</p>
     </div>
-    <div class="mb-6 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-4"><label class="flex items-start"><input type="checkbox" id="confirmSubmit" required class="mt-1 w-4 h-4 text-primary-600 rounded"><span class="ml-3 text-sm leading-6">Я подтверждаю, что все данные в заявлении верны, документ подписан собственноручно, и даю согласие на обработку персональных данных.</span></label></div>
+    <div class="mb-6 rounded-lg border border-blue-300 bg-blue-50 px-4 py-4"><label class="flex items-start"><input type="checkbox" id="confirmSubmit" required class="mt-1 w-4 h-4 text-primary-600 rounded"><span class="ml-3 text-sm leading-6">Я подтверждаю, что все данные в заявлении верны, документ подписан собственноручно, и даю согласие на обработку персональных данных.</span></label></div>
     <div class="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-4">
       <h4 class="mb-3 font-semibold text-gray-900">Итого:</h4>
       <div class="space-y-2 text-sm">
@@ -221,7 +202,7 @@
         <p>Статус после отправки: <span class="inline-flex rounded-full bg-primary-100 px-2.5 py-1 text-xs font-medium text-primary-700">На проверке</span></p>
       </div>
     </div>
-    <div class="mt-8 flex justify-between"><button type="button" id="step4Prev" class="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white rounded-lg">← Назад</button><button type="submit" id="submitBtn" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50" disabled>Отправить заявление</button></div>
+    <div class="mt-8 flex justify-between"><button type="button" id="step4Prev" class="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white rounded-lg">← Назад</button><button type="submit" id="submitBtn" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50" disabled>Отправить заявление</button></div>
   </div>
 </form>
 @endif
@@ -238,9 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const programHint = document.getElementById('programHint');
   const benefitCheck = document.getElementById('isBenefit');
   const benefitType = document.getElementById('benefitType');
-  const partTimeOption = document.getElementById('partTimeOption');
-  const partTimeInput = document.getElementById('partTimeInput');
-  const studyFormHint = document.getElementById('studyFormHint');
   const budgetOption = document.getElementById('budgetOption');
   const budgetInput = document.getElementById('budgetInput');
   const paidOption = document.getElementById('paidOption');
@@ -251,31 +229,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Priority range
   priorityRange?.addEventListener('input', function() { if (priorityValue) priorityValue.textContent = this.value; });
   priorityRange?.addEventListener('change', function() { if (priorityValue) priorityValue.textContent = this.value; });
-
-  function updateStudyFormState() {
-    const selected = programSelect?.options[programSelect.selectedIndex];
-    const allowsPartTime = selected?.dataset.hasForm !== '0';
-
-    if (!allowsPartTime) {
-      document.querySelector('input[name="study_form"][value="full_time"]').checked = true;
-    }
-
-    if (partTimeInput) {
-      partTimeInput.disabled = !allowsPartTime;
-    }
-
-    partTimeOption?.classList.toggle('disabled', !allowsPartTime);
-    studyFormHint?.classList.toggle('hidden', allowsPartTime);
-
-    document.querySelectorAll('.study-form-option').forEach(label => {
-      const input = label.querySelector('input[name="study_form"]');
-      label.classList.toggle('selected', !!input?.checked);
-    });
-  }
-
-  document.querySelectorAll('input[name="study_form"]').forEach(input => {
-    input.addEventListener('change', updateStudyFormState);
-  });
 
   function updateFundingState() {
     const selected = programSelect?.options[programSelect.selectedIndex];
@@ -322,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Program select → enable next, populate subjects
   programSelect?.addEventListener('change', function() {
     step1Next.disabled = !this.value;
-    updateStudyFormState();
     updateFundingState();
     if (this.value) {
       const opt = this.options[this.selectedIndex];
@@ -384,8 +336,8 @@ document.addEventListener('DOMContentLoaded', function() {
       let allValid = true;
       document.querySelectorAll('#subjectsContainer input[type="number"]').forEach(inp => {
         const v = parseFloat(inp.value);
-        if (isNaN(v) || v < 2 || v > 5) { allValid = false; inp.classList.add('border-red-500'); }
-        else { inp.classList.remove('border-red-500'); }
+        if (isNaN(v) || v < 2 || v > 5) { allValid = false; inp.classList.add('border-blue-500'); }
+        else { inp.classList.remove('border-blue-500'); }
       });
       if (!allValid) { alert('Все оценки должны быть в диапазоне от 2 до 5'); return; }
     }
@@ -463,7 +415,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Trigger initial state
   if (programSelect?.value) programSelect.dispatchEvent(new Event('change'));
-  updateStudyFormState();
   updateFundingState();
 });
 </script>

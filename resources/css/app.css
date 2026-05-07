@@ -9,39 +9,39 @@
     --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --color-primary: var(--auth-primary, #0b5f56);
-    --color-primary-50: var(--auth-primary-50, #edf7f4);
-    --color-primary-100: var(--auth-primary-100, #d6eee8);
-    --color-primary-600: var(--auth-primary, #0b5f56);
-    --color-primary-700: var(--auth-primary-700, #074c45);
+    --color-primary: var(--auth-primary, #0ea5e9);
+    --color-primary-50: var(--auth-primary-50, #eff6ff);
+    --color-primary-100: var(--auth-primary-100, #dbeafe);
+    --color-primary-600: var(--auth-primary, #0ea5e9);
+    --color-primary-700: var(--auth-primary-700, #0284c7);
 
-    --color-secondary: var(--theme-secondary, #c74b00);
-    --color-secondary-50: var(--theme-secondary-50, #fff4ec);
-    --color-secondary-100: var(--theme-secondary-100, #ffe5d2);
-    --color-secondary-600: var(--theme-secondary, #c74b00);
-    --color-secondary-700: var(--theme-secondary-700, #a53d00);
+    --color-secondary: var(--theme-secondary, #0ea5e9);
+    --color-secondary-50: var(--theme-secondary-50, #eff6ff);
+    --color-secondary-100: var(--theme-secondary-100, #dbeafe);
+    --color-secondary-600: var(--theme-secondary, #0ea5e9);
+    --color-secondary-700: var(--theme-secondary-700, #0284c7);
 
-    --color-accent-orange: #f47a00;
-    --color-accent-blue: #0e5d9f;
-    --color-accent-steel: #4d759d;
-    --color-accent-yellow: #ffbf00;
-    --color-accent-red: #ed3216;
-    --color-accent-magenta: #b33c96;
+    --color-accent-orange: #60a5fa;
+    --color-accent-blue: #0ea5e9;
+    --color-accent-steel: #3b82f6;
+    --color-accent-yellow: #93c5fd;
+    --color-accent-red: #38bdf8;
+    --color-accent-magenta: #0284c7;
 
-    --color-success: var(--theme-success, #4d7c3f);
-    --color-success-600: var(--theme-success-600, #3f6833);
-    --color-warning: var(--theme-warning, #c74b00);
-    --color-warning-600: var(--theme-warning-600, #a53d00);
-    --color-danger: var(--theme-danger, #dc2626);
-    --color-danger-600: var(--theme-danger-600, #b91c1c);
+    --color-success: var(--theme-success, #0ea5e9);
+    --color-success-600: var(--theme-success-600, #0284c7);
+    --color-warning: var(--theme-warning, #38bdf8);
+    --color-warning-600: var(--theme-warning-600, #0ea5e9);
+    --color-danger: var(--theme-danger, #0284c7);
+    --color-danger-600: var(--theme-danger-600, #0369a1);
 
-    --color-gray-50: #f7f8f5;
-    --color-gray-100: #ecefeb;
-    --color-gray-200: #d8ded8;
-    --color-gray-300: #bbc6bf;
-    --color-gray-500: #687870;
-    --color-gray-700: #31443e;
-    --color-gray-900: #162622;
+    --color-gray-50: #f8fbff;
+    --color-gray-100: #eef5ff;
+    --color-gray-200: #d7e6f8;
+    --color-gray-300: #b8cce8;
+    --color-gray-500: #5f7392;
+    --color-gray-700: #334766;
+    --color-gray-900: #16233f;
 
     --radius-lg: 0.5rem;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);

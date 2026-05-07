@@ -12,7 +12,7 @@
       @foreach($programs as $p)<option value="{{ $p->id }}" {{ $selectedProgramId == $p->id ? 'selected' : '' }}>{{ $p->specialty->full_title }}</option>@endforeach
     </select></div>
     <div><label class="block text-xs font-medium text-gray-500 mb-1">Финансирование</label><select name="funding_type" onchange="this.form.submit()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"><option value="budget" {{ $fundingType==='budget' ? 'selected' : '' }}>Бюджет</option><option value="paid" {{ $fundingType==='paid' ? 'selected' : '' }}>Хозрасчёт</option></select></div>
-    @if($selectedProgramId)<a href="{{ route('commission.ranking.export', ['program_id'=>$selectedProgramId, 'funding_type'=>$fundingType]) }}" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">📥 Excel</a>@endif
+    @if($selectedProgramId)<a href="{{ route('commission.ranking.export', ['program_id'=>$selectedProgramId, 'funding_type'=>$fundingType]) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">📥 Excel</a>@endif
   </form>
 </div>
 
@@ -23,12 +23,12 @@
     <tbody class="divide-y divide-gray-200">
       @forelse($ranking as $i => $app)
       @php $plan = $fundingType==='budget' ? $selectedProgram->plan_count : $selectedProgram->plan_count_paid; @endphp
-      <tr class="{{ ($i+1) <= $plan ? 'bg-green-50' : '' }} hover:bg-gray-50">
-        <td class="px-4 py-3 font-bold {{ ($i+1) <= $plan ? 'text-green-700' : 'text-gray-500' }}">{{ $i+1 }}</td>
+      <tr class="{{ ($i+1) <= $plan ? 'bg-blue-50' : '' }} hover:bg-gray-50">
+        <td class="px-4 py-3 font-bold {{ ($i+1) <= $plan ? 'text-blue-700' : 'text-gray-500' }}">{{ $i+1 }}</td>
         <td class="px-4 py-3 font-medium">
           {{ $app->app_full_name }}
           @if($app->is_benefit && $app->benefit_type)
-            <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded uppercase">
+            <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded uppercase">
               {{ $app->benefit_type === 'olympiad' ? 'Олимпиада' : ($app->benefit_type === 'disability' ? 'Инвалидность' : ($app->benefit_type === 'svo' ? 'СВО' : $app->benefit_type)) }}
             </span>
           @endif

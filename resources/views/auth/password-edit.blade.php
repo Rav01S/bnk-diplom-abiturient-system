@@ -28,7 +28,7 @@
                 <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Текущий пароль</label>
                 <input type="password" id="current_password" name="current_password" required 
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition">
-                @error('current_password') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @error('current_password') <p class="mt-1 text-sm text-blue-600">{{ $message }}</p> @enderror
             </div>
 
             <hr class="border-gray-100">
@@ -37,7 +37,7 @@
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Новый пароль</label>
                 <input type="password" id="password" name="password" required minlength="8"
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition">
-                @error('password') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                @error('password') <p class="mt-1 text-sm text-blue-600">{{ $message }}</p> @enderror
                 <p class="mt-1 text-xs text-gray-500">Минимум 8 символов</p>
             </div>
 

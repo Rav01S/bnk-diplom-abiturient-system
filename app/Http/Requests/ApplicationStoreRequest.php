@@ -12,6 +12,13 @@ class ApplicationStoreRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'study_form' => 'full_time',
+        ]);
+    }
+
     /**
      * Правила валидации при создании/обновлении заявления.
      *
@@ -22,7 +29,7 @@ class ApplicationStoreRequest extends FormRequest
         return [
             'program_id' => ['required', 'exists:programs,id'],
             'priority' => ['required', 'integer', 'min:1', 'max:5'],
-            'study_form' => ['required', 'in:full_time,part_time'],
+            'study_form' => ['required', 'in:full_time'],
             'funding_type' => ['required', 'in:budget,paid'],
             'doc_type' => ['required', 'in:original,copy'],
             'is_benefit' => ['nullable', 'boolean'],
@@ -47,7 +54,6 @@ class ApplicationStoreRequest extends FormRequest
             'priority.required' => 'Укажите приоритет заявления.',
             'priority.min' => 'Приоритет от 1 до 5.',
             'priority.max' => 'Приоритет от 1 до 5.',
-            'study_form.required' => 'Выберите форму обучения.',
             'funding_type.required' => 'Выберите тип финансирования.',
             'doc_type.required' => 'Укажите тип документа.',
             'benefit_type.required' => 'Выберите тип льготы.',
@@ -82,10 +88,6 @@ class ApplicationStoreRequest extends FormRequest
             $program = \App\Models\Program::find($this->input('program_id'));
             if (! $program) {
                 return;
-            }
-
-            if ($this->input('study_form') === 'part_time' && ! $program->has_study_form) {
-                $validator->errors()->add('study_form', 'Для выбранной программы доступна только очная форма обучения.');
             }
 
             if ($this->input('funding_type') === 'budget' && $program->plan_count <= 0) {

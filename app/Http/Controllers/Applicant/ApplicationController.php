@@ -124,10 +124,6 @@ class ApplicationController extends Controller
             return back()->withErrors(['program_id' => 'Программа не принимает заявления.']);
         }
 
-        if ($validated['study_form'] === 'part_time' && ! $program->has_study_form) {
-            return back()->withErrors(['study_form' => 'Для выбранной программы доступна только очная форма обучения.']);
-        }
-
         if ($validated['funding_type'] === 'budget' && $program->plan_count <= 0) {
             return back()->withErrors(['funding_type' => 'Для выбранной программы нет бюджетных мест.']);
         }
@@ -136,19 +132,18 @@ class ApplicationController extends Controller
             return back()->withErrors(['funding_type' => 'Для выбранной программы нет мест на хозрасчёт.']);
         }
 
-        // Проверка на дубликат: та же специальность, форма обучения и тип финансирования
-        $studyForm = $program->has_study_form ? $validated['study_form'] : 'full_time';
+        // Проверка на дубликат: та же специальность и тип финансирования.
         $existingDuplicate = $applicant->applications()
             ->where('status', '!=', 'cancelled')
-            ->whereHas('program', function($query) use ($program) {
+            ->whereHas('program', function ($query) use ($program) {
                 $query->where('specialty_id', $program->specialty_id);
             })
-            ->where('study_form', $studyForm)
+            ->where('study_form', 'full_time')
             ->where('funding_type', $validated['funding_type'])
             ->exists();
 
         if ($existingDuplicate) {
-            return back()->withErrors(['program_id' => 'У вас уже есть активное заявление или черновик на эту специальность с такими же условиями обучения и финансирования.']);
+            return back()->withErrors(['program_id' => 'У вас уже есть активное заявление или черновик на эту специальность с таким же типом финансирования.']);
         }
 
         $application = DB::transaction(function () use ($applicant, $validated, $program, $request): Application {
@@ -159,7 +154,7 @@ class ApplicationController extends Controller
             $application->status = 'submitted';
             $application->revision = 1;
             $application->doc_type = $validated['doc_type'];
-            $application->study_form = $program->has_study_form ? $validated['study_form'] : 'full_time';
+            $application->study_form = 'full_time';
             $application->funding_type = $validated['funding_type'];
             $application->is_benefit = $request->boolean('is_benefit');
             $application->benefit_type = $request->input('benefit_type');
@@ -237,25 +232,24 @@ class ApplicationController extends Controller
         $program = Program::findOrFail($validated['program_id']);
 
         // Проверка на дубликат при обновлении
-        $studyForm = $program->has_study_form ? $validated['study_form'] : 'full_time';
         $existingDuplicate = $applicant->applications()
             ->whereKeyNot($application->id)
             ->where('status', '!=', 'cancelled')
-            ->whereHas('program', function($query) use ($program) {
+            ->whereHas('program', function ($query) use ($program) {
                 $query->where('specialty_id', $program->specialty_id);
             })
-            ->where('study_form', $studyForm)
+            ->where('study_form', 'full_time')
             ->where('funding_type', $validated['funding_type'])
             ->exists();
 
         if ($existingDuplicate) {
-            return back()->withErrors(['program_id' => 'У вас уже есть другое активное заявление или черновик на эту специальность с такими же условиями обучения и финансирования.']);
+            return back()->withErrors(['program_id' => 'У вас уже есть другое активное заявление или черновик на эту специальность с таким же типом финансирования.']);
         }
 
         DB::transaction(function () use ($application, $validated, $applicant, $request): void {
             $application->priority = $validated['priority'];
             $application->doc_type = $validated['doc_type'];
-            $application->study_form = $validated['study_form'];
+            $application->study_form = 'full_time';
             $application->funding_type = $validated['funding_type'];
             $application->is_benefit = $request->boolean('is_benefit');
             $application->benefit_type = $request->input('benefit_type');
@@ -361,8 +355,8 @@ class ApplicationController extends Controller
             $templateProcessor->setValue('speciality_name', $specialty->name ?? '');
         }
         
-        $templateProcessor->setValue('is_ochnaya', $application->study_form === 'full_time' ? '☑' : '☐');
-        $templateProcessor->setValue('is_zaochnaya', $application->study_form === 'part_time' ? '☑' : '☐');
+        $templateProcessor->setValue('is_ochnaya', '☑');
+        $templateProcessor->setValue('is_zaochnaya', '☐');
         
         $templateProcessor->setValue('is_budget', $application->funding_type === 'budget' ? '☑' : '☐');
         $templateProcessor->setValue('is_platno', $application->funding_type === 'paid' ? '☑' : '☐');
@@ -448,9 +442,8 @@ class ApplicationController extends Controller
             $templateProcessor->setValue('speciality_name', $specialty->name ?? '');
         }
         
-        $studyForm = $request->input('study_form');
-        $templateProcessor->setValue('is_ochnaya', $studyForm === 'full_time' ? '☑' : '☐');
-        $templateProcessor->setValue('is_zaochnaya', $studyForm === 'part_time' ? '☑' : '☐');
+        $templateProcessor->setValue('is_ochnaya', '☑');
+        $templateProcessor->setValue('is_zaochnaya', '☐');
         
         $fundingType = $request->input('funding_type');
         $templateProcessor->setValue('is_budget', $fundingType === 'budget' ? '☑' : '☐');

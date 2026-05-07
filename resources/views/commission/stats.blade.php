@@ -10,7 +10,7 @@
       <label class="text-xs font-medium text-gray-500">Год:</label>
       <input type="number" name="campaign_year" value="{{ $year }}" onchange="this.form.submit()" class="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white">
     </form>
-    <a href="{{ route('commission.stats.export', ['campaign_year' => $year]) }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition">
+    <a href="{{ route('commission.stats.export', ['campaign_year' => $year]) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
       Экспорт Excel
     </a>
@@ -22,10 +22,10 @@
       @foreach($stats as $s)
       @php $pct = $s['plan_budget'] > 0 ? round(($s['fact_budget'] / $s['plan_budget']) * 100) : 0; @endphp
       <tr class="hover:bg-gray-50">
-        <td class="px-4 py-3"><div class="font-medium text-gray-900">{{ $s['program']->specialty->full_title }}</div><div class="text-xs text-gray-500">{{ $s['program']->has_study_form ? 'Очная/Заочная' : 'Только очная' }}</div></td>
+        <td class="px-4 py-3"><div class="font-medium text-gray-900">{{ $s['program']->specialty->full_title }}</div></td>
         <td class="px-4 py-3 text-center font-medium">{{ $s['plan_budget'] }}</td>
-        <td class="px-4 py-3 text-center font-bold {{ $s['fact_budget'] >= $s['plan_budget'] ? 'text-green-700' : '' }}">{{ $s['fact_budget'] }}</td>
-        <td class="px-4 py-3 text-center"><div class="w-16 mx-auto"><div class="h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full {{ $pct >= 100 ? 'bg-green-500' : ($pct >= 50 ? 'bg-primary-600' : 'bg-orange-500') }} rounded-full" style="width: {{ min($pct, 100) }}%"></div></div><span class="text-xs text-gray-500">{{ $pct }}%</span></div></td>
+        <td class="px-4 py-3 text-center font-bold {{ $s['fact_budget'] >= $s['plan_budget'] ? 'text-blue-700' : '' }}">{{ $s['fact_budget'] }}</td>
+        <td class="px-4 py-3 text-center"><div class="w-16 mx-auto"><div class="h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full {{ $pct >= 100 ? 'bg-blue-500' : ($pct >= 50 ? 'bg-primary-600' : 'bg-blue-500') }} rounded-full" style="width: {{ min($pct, 100) }}%"></div></div><span class="text-xs text-gray-500">{{ $pct }}%</span></div></td>
         <td class="px-4 py-3 text-center font-medium">{{ $s['plan_paid'] }}</td>
         <td class="px-4 py-3 text-center font-bold">{{ $s['fact_paid'] }}</td>
         <td class="px-4 py-3 text-center"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">{{ $s['submitted'] }}</span></td>

@@ -89,9 +89,8 @@ class SpecialtyController extends Controller
         $validated = $request->validate([
             'campaign_year' => [
                 'required', 'integer', 'min:2020', 'max:2030',
-                Rule::unique('programs')->where('specialty_id', $specialty->id)
+                Rule::unique('programs')->where('specialty_id', $specialty->id),
             ],
-            'has_study_form' => ['nullable', 'boolean'],
             'plan_count' => ['required', 'integer', 'min:0'],
             'plan_count_paid' => ['required', 'integer', 'min:0'],
             'is_open' => ['nullable', 'boolean'],
@@ -99,7 +98,7 @@ class SpecialtyController extends Controller
             'open_until' => ['nullable', 'date', 'after_or_equal:open_from'],
         ]);
 
-        $validated['has_study_form'] = $request->boolean('has_study_form');
+        $validated['has_study_form'] = false;
         $validated['is_open'] = $request->boolean('is_open');
 
         $specialty->programs()->create($validated);
@@ -112,9 +111,8 @@ class SpecialtyController extends Controller
         $validated = $request->validate([
             'campaign_year' => [
                 'required', 'integer', 'min:2020', 'max:2030',
-                Rule::unique('programs')->where('specialty_id', $program->specialty_id)->ignore($program->id)
+                Rule::unique('programs')->where('specialty_id', $program->specialty_id)->ignore($program->id),
             ],
-            'has_study_form' => ['nullable', 'boolean'],
             'plan_count' => ['required', 'integer', 'min:0'],
             'plan_count_paid' => ['required', 'integer', 'min:0'],
             'is_open' => ['nullable', 'boolean'],
@@ -122,7 +120,7 @@ class SpecialtyController extends Controller
             'open_until' => ['nullable', 'date', 'after_or_equal:open_from'],
         ]);
 
-        $validated['has_study_form'] = $request->boolean('has_study_form');
+        $validated['has_study_form'] = false;
         $validated['is_open'] = $request->boolean('is_open');
 
         $program->update($validated);
