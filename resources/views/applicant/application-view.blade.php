@@ -106,7 +106,6 @@
       <h3 class="font-medium text-gray-900 mb-3">Действия</h3>
       <div class="space-y-2">
         <a href="{{ route('applicant.applications.template', $application) }}" class="block w-full text-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">📄 Скачать шаблон</a>
-        <a href="{{ route('applicant.applications.ranking', $application) }}" target="_blank" class="block w-full text-center px-4 py-2 border border-primary-600 text-primary-700 rounded-lg text-sm hover:bg-primary-50">Посмотреть ранжирование</a>
         @if($application->isEditable())<a href="{{ route('applicant.applications.edit', $application) }}" class="block w-full text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">✏️ Редактировать</a>@endif
         @if($application->isCancellable())<form method="POST" action="{{ route('applicant.applications.cancel', $application) }}" onsubmit="return confirm('Отменить заявление?')">@csrf @method('PATCH')<button type="submit" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">✕ Отменить</button></form>@endif
       </div>
