@@ -32,7 +32,6 @@
           <td class="px-4 py-3 text-gray-600 text-xs">{{ $app->created_at->format('d.m.Y') }}</td>
           <td class="px-4 py-3 text-right space-x-1">
             <a href="{{ route('applicant.applications.show', $app) }}" class="text-primary-600 hover:text-primary-700 text-xs font-medium">Просмотр</a>
-            <a href="{{ route('applicant.applications.ranking', $app) }}" target="_blank" class="text-primary-600 hover:text-primary-700 text-xs font-medium ml-1">Ранжирование</a>
             @if($app->isEditable())<a href="{{ route('applicant.applications.edit', $app) }}" class="text-warning-600 hover:text-warning-700 text-xs font-medium ml-1">Ред.</a>@endif
             @if($app->isCancellable())<form method="POST" action="{{ route('applicant.applications.cancel', $app) }}" class="inline" onsubmit="return confirm('Отменить заявление?')">@csrf @method('PATCH')<button type="submit" class="text-danger hover:text-red-700 text-xs font-medium ml-1">Отменить</button></form>@endif
             @if($app->isDeletable())<form method="POST" action="{{ route('applicant.applications.destroy', $app) }}" class="inline" onsubmit="return confirm('Удалить заявление навсегда?')">@csrf @method('DELETE')<button type="submit" class="text-gray-500 hover:text-red-700 text-xs font-medium ml-1">Удалить</button></form>@endif

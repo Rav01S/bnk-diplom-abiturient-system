@@ -69,7 +69,6 @@ class Applicant extends Model
             && $this->snils
             && $this->phone
             && $this->prev_education
-            && $this->avg_cert_score
             && $this->photo_passport
             && $this->photo_snils;
     }

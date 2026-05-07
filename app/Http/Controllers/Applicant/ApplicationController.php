@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class ApplicationController extends Controller
 {
@@ -83,7 +83,7 @@ class ApplicationController extends Controller
             ->where('is_open', true)
             ->get()
             ->groupBy('specialty_id')
-            ->map(fn($group) => $group->sortByDesc('campaign_year')->first());
+            ->map(fn ($group) => $group->sortByDesc('campaign_year')->first());
         $specialtiesWithoutPrograms = Specialty::doesntHave('programs')->get();
         $occupiedPriorities = $applicant->applications()->active()->pluck('priority')->all();
         $maxSelectablePriority = min($activeCount + 1, 5);
@@ -140,7 +140,7 @@ class ApplicationController extends Controller
         $studyForm = $program->has_study_form ? $validated['study_form'] : 'full_time';
         $existingDuplicate = $applicant->applications()
             ->where('status', '!=', 'cancelled')
-            ->whereHas('program', function($query) use ($program) {
+            ->whereHas('program', function ($query) use ($program) {
                 $query->where('specialty_id', $program->specialty_id);
             })
             ->where('study_form', $studyForm)
@@ -197,9 +197,25 @@ class ApplicationController extends Controller
     public function show(Application $application): View
     {
         $this->authorizeApplicant($application);
-        $application->load('program.specialty', 'scores');
+        $application->load('program.specialty', 'scores', 'applicant');
 
-        return view('applicant.application-view', compact('application'));
+        $ranking = Application::with(['scores', 'applicant'])
+            ->where('program_id', $application->program_id)
+            ->where('funding_type', $application->funding_type)
+            ->where(function ($query) use ($application) {
+                $query->where('status', 'approved')
+                    ->orWhere('id', $application->id);
+            })
+            ->get()
+            ->sortByDesc(fn ($app) => [
+                $app->is_benefit && $app->benefit_type === 'svo' ? 1 : 0,
+                (float) ($app->applicant->avg_cert_score ?? 0),
+                $app->average_score,
+                $app->is_benefit ? 1 : 0,
+            ])
+            ->values();
+
+        return view('applicant.application-view', compact('application', 'ranking'));
     }
 
     public function edit(Application $application): View
@@ -241,7 +257,7 @@ class ApplicationController extends Controller
         $existingDuplicate = $applicant->applications()
             ->whereKeyNot($application->id)
             ->where('status', '!=', 'cancelled')
-            ->whereHas('program', function($query) use ($program) {
+            ->whereHas('program', function ($query) use ($program) {
                 $query->where('specialty_id', $program->specialty_id);
             })
             ->where('study_form', $studyForm)
@@ -325,26 +341,26 @@ class ApplicationController extends Controller
 
         $templatePath = base_path('templates/правила приема, заявление.docx');
 
-        if (!file_exists($templatePath)) {
+        if (! file_exists($templatePath)) {
             abort(404, 'Шаблон не найден');
         }
 
-        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
+        $templateProcessor = new TemplateProcessor($templatePath);
         $specialty = $application->program->specialty;
 
         $templateProcessor->setValue('last_name', $application->app_last_name ?? '');
         $templateProcessor->setValue('first_name', $application->app_first_name ?? '');
         $templateProcessor->setValue('middle_name', $application->app_middle_name ?? '');
-        
+
         $birthDate = $application->app_birth_date ? $application->app_birth_date->format('d.m.Y') : '';
         $templateProcessor->setValue('birth_date', $birthDate);
-        
+
         $templateProcessor->setValue('document_type', 'Паспорт гражданина РФ');
         $templateProcessor->setValue('passport_series', $application->app_passport_series ?? '');
         $templateProcessor->setValue('passport_number', $application->app_passport_number ?? '');
         $templateProcessor->setValue('passport_issued_by', $application->app_passport_issued_by ?? '');
         $templateProcessor->setValue('snils', $application->app_snils ?? '');
-        
+
         if ($specialty && $specialty->is_profession) {
             $templateProcessor->setValue('is_profession', '☑');
             $templateProcessor->setValue('is_specialnost', '☐');
@@ -360,36 +376,36 @@ class ApplicationController extends Controller
             $templateProcessor->setValue('speciality_code', $specialty->code ?? '');
             $templateProcessor->setValue('speciality_name', $specialty->name ?? '');
         }
-        
+
         $templateProcessor->setValue('is_ochnaya', $application->study_form === 'full_time' ? '☑' : '☐');
         $templateProcessor->setValue('is_zaochnaya', $application->study_form === 'part_time' ? '☑' : '☐');
-        
+
         $templateProcessor->setValue('is_budget', $application->funding_type === 'budget' ? '☑' : '☐');
         $templateProcessor->setValue('is_platno', $application->funding_type === 'paid' ? '☑' : '☐');
-        
+
         $prevEdu = $application->app_prev_education;
         $templateProcessor->setValue('is_osnovnoe_objee_obrazovanie', $prevEdu === '9class' ? '☑' : '☐');
         $templateProcessor->setValue('is_srednee_objee_obrazovanie', $prevEdu === '11class' ? '☑' : '☐');
         $templateProcessor->setValue('is_srednee_profesionalnoe_obrazovanie', $prevEdu === 'spo' ? '☑' : '☐');
         $templateProcessor->setValue('is_vishee_obrazovanie', $prevEdu === 'vo' ? '☑' : '☐');
-        
+
         $templateProcessor->setValue('edu_doc_series', $application->app_edu_doc_series ?? '');
         $templateProcessor->setValue('edu_doc_number', $application->app_edu_doc_number ?? '');
-        
+
         $eduIssueDate = $application->app_edu_issue_date ? $application->app_edu_issue_date->format('d.m.Y') : '';
         $templateProcessor->setValue('edu_issue_date', $eduIssueDate);
         $templateProcessor->setValue('edu_doc_issued_by', $application->app_edu_doc_issued_by ?? '');
-        
+
         $templateProcessor->setValue('is_have_lgota', $application->is_benefit ? '☑' : '☐');
         $templateProcessor->setValue('is_needed_v_objejitii', $application->needs_dorm ? '☑' : '☐');
-        $templateProcessor->setValue('is_not_needed_v_objejitii', !$application->needs_dorm ? '☑' : '☐');
-        $templateProcessor->setValue(' is_not_needed_v_objejitii ', !$application->needs_dorm ? '☑' : '☐');
-        
+        $templateProcessor->setValue('is_not_needed_v_objejitii', ! $application->needs_dorm ? '☑' : '☐');
+        $templateProcessor->setValue(' is_not_needed_v_objejitii ', ! $application->needs_dorm ? '☑' : '☐');
+
         $templateProcessor->setValue('is_first_education', $application->is_first_spo ? '☑' : '☐');
-        $templateProcessor->setValue('is_not_first_education', !$application->is_first_spo ? '☑' : '☐');
+        $templateProcessor->setValue('is_not_first_education', ! $application->is_first_spo ? '☑' : '☐');
 
         $fileName = "zayavlenie_{$application->id}.docx";
-        $tempPath = storage_path('app/public/' . $fileName);
+        $tempPath = storage_path('app/public/'.$fileName);
         $templateProcessor->saveAs($tempPath);
 
         return response()->download($tempPath)->deleteFileAfterSend(true);
@@ -411,27 +427,27 @@ class ApplicationController extends Controller
         $applicant = auth()->user()->applicant;
         $templatePath = base_path('templates/правила приема, заявление.docx');
 
-        if (!file_exists($templatePath)) {
+        if (! file_exists($templatePath)) {
             abort(404, 'Шаблон не найден');
         }
 
-        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
-        $program = \App\Models\Program::with('specialty')->find($request->input('program_id'));
+        $templateProcessor = new TemplateProcessor($templatePath);
+        $program = Program::with('specialty')->find($request->input('program_id'));
         $specialty = $program ? $program->specialty : null;
 
         $templateProcessor->setValue('last_name', $applicant->last_name ?? '');
         $templateProcessor->setValue('first_name', $applicant->first_name ?? '');
         $templateProcessor->setValue('middle_name', $applicant->middle_name ?? '');
-        
+
         $birthDate = $applicant->birth_date ? $applicant->birth_date->format('d.m.Y') : '';
         $templateProcessor->setValue('birth_date', $birthDate);
-        
+
         $templateProcessor->setValue('document_type', 'Паспорт гражданина РФ');
         $templateProcessor->setValue('passport_series', $applicant->passport_series ?? '');
         $templateProcessor->setValue('passport_number', $applicant->passport_number ?? '');
         $templateProcessor->setValue('passport_issued_by', $applicant->passport_issued_by ?? '');
         $templateProcessor->setValue('snils', $applicant->snils ?? '');
-        
+
         if ($specialty && $specialty->is_profession) {
             $templateProcessor->setValue('is_profession', '☑');
             $templateProcessor->setValue('is_specialnost', '☐');
@@ -447,42 +463,42 @@ class ApplicationController extends Controller
             $templateProcessor->setValue('speciality_code', $specialty->code ?? '');
             $templateProcessor->setValue('speciality_name', $specialty->name ?? '');
         }
-        
+
         $studyForm = $request->input('study_form');
         $templateProcessor->setValue('is_ochnaya', $studyForm === 'full_time' ? '☑' : '☐');
         $templateProcessor->setValue('is_zaochnaya', $studyForm === 'part_time' ? '☑' : '☐');
-        
+
         $fundingType = $request->input('funding_type');
         $templateProcessor->setValue('is_budget', $fundingType === 'budget' ? '☑' : '☐');
         $templateProcessor->setValue('is_platno', $fundingType === 'paid' ? '☑' : '☐');
-        
+
         $prevEdu = $applicant->prev_education;
         $templateProcessor->setValue('is_osnovnoe_objee_obrazovanie', $prevEdu === '9class' ? '☑' : '☐');
         $templateProcessor->setValue('is_srednee_objee_obrazovanie', $prevEdu === '11class' ? '☑' : '☐');
         $templateProcessor->setValue('is_srednee_profesionalnoe_obrazovanie', $prevEdu === 'spo' ? '☑' : '☐');
         $templateProcessor->setValue('is_vishee_obrazovanie', $prevEdu === 'vo' ? '☑' : '☐');
-        
+
         $templateProcessor->setValue('edu_doc_series', $applicant->edu_doc_series ?? '');
         $templateProcessor->setValue('edu_doc_number', $applicant->edu_doc_number ?? '');
-        
+
         $eduIssueDate = $applicant->edu_issue_date ? $applicant->edu_issue_date->format('d.m.Y') : '';
         $templateProcessor->setValue('edu_issue_date', $eduIssueDate);
         $templateProcessor->setValue('edu_doc_issued_by', $applicant->edu_doc_issued_by ?? '');
-        
+
         $isBenefit = $request->boolean('is_benefit');
         $templateProcessor->setValue('is_have_lgota', $isBenefit ? '☑' : '☐');
-        
+
         $needsDorm = $request->boolean('needs_dorm');
         $templateProcessor->setValue('is_needed_v_objejitii', $needsDorm ? '☑' : '☐');
-        $templateProcessor->setValue('is_not_needed_v_objejitii', !$needsDorm ? '☑' : '☐');
-        $templateProcessor->setValue(' is_not_needed_v_objejitii ', !$needsDorm ? '☑' : '☐');
-        
+        $templateProcessor->setValue('is_not_needed_v_objejitii', ! $needsDorm ? '☑' : '☐');
+        $templateProcessor->setValue(' is_not_needed_v_objejitii ', ! $needsDorm ? '☑' : '☐');
+
         $isFirstSpo = $request->boolean('is_first_spo');
         $templateProcessor->setValue('is_first_education', $isFirstSpo ? '☑' : '☐');
-        $templateProcessor->setValue('is_not_first_education', !$isFirstSpo ? '☑' : '☐');
+        $templateProcessor->setValue('is_not_first_education', ! $isFirstSpo ? '☑' : '☐');
 
-        $fileName = "zayavlenie_draft_" . auth()->id() . ".docx";
-        $tempPath = storage_path('app/public/' . $fileName);
+        $fileName = 'zayavlenie_draft_'.auth()->id().'.docx';
+        $tempPath = storage_path('app/public/'.$fileName);
         $templateProcessor->saveAs($tempPath);
 
         return response()->download($tempPath)->deleteFileAfterSend(true);
@@ -492,7 +508,7 @@ class ApplicationController extends Controller
     {
         $templatePath = base_path('templates/правила приема, заявление пустое.docx');
 
-        if (!file_exists($templatePath)) {
+        if (! file_exists($templatePath)) {
             abort(404, 'Пустой шаблон не найден');
         }
 

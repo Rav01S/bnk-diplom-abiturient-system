@@ -20,7 +20,12 @@ class ApplicationReviewRequest extends FormRequest
     {
         $rules = [
             'decision' => ['required', 'in:approved,rejected,rework_needed'],
+            'avg_cert_score' => ['nullable', 'numeric', 'min:2', 'max:5'],
         ];
+
+        if ($this->input('decision') === 'approved') {
+            $rules['avg_cert_score'] = ['required', 'numeric', 'min:2', 'max:5'];
+        }
 
         // Причина обязательна при отклонении или отправке на доработку
         if (in_array($this->input('decision'), ['rejected', 'rework_needed'])) {

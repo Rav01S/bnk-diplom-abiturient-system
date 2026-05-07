@@ -19,7 +19,7 @@
 @if($selectedProgram)
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
   <div class="px-4 py-3 border-b border-gray-200 bg-gray-50"><h3 class="font-medium text-gray-900">{{ $selectedProgram->specialty->full_title }} — {{ $fundingType==='budget' ? 'Бюджет' : 'Хозрасчёт' }}</h3><p class="text-xs text-gray-500">Мест: {{ $fundingType==='budget' ? $selectedProgram->plan_count : $selectedProgram->plan_count_paid }} • В списке: {{ $ranking->count() }}</p></div>
-  <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500 w-12">№</th><th class="px-4 py-3 text-left font-medium text-gray-500">ФИО</th><th class="px-4 py-3 text-center font-medium text-gray-500">Балл 1</th><th class="px-4 py-3 text-center font-medium text-gray-500">Балл 2</th><th class="px-4 py-3 text-center font-medium text-gray-500">Балл 3</th><th class="px-4 py-3 text-center font-medium text-gray-500" title="Средний балл по аттестату">Ср. балл аттестата</th><th class="px-4 py-3 text-center font-medium text-gray-500" title="Средний балл по 3 профильным предметам">Ср. балл (по 3 предм.)</th><th class="px-4 py-3 text-center font-medium text-gray-500">Приор.</th></tr></thead>
+  <div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left font-medium text-gray-500 w-12">№</th><th class="px-4 py-3 text-left font-medium text-gray-500">ФИО</th><th class="px-4 py-3 text-center font-medium text-gray-500">Балл 1</th><th class="px-4 py-3 text-center font-medium text-gray-500">Балл 2</th><th class="px-4 py-3 text-center font-medium text-gray-500">Балл 3</th><th class="px-4 py-3 text-center font-medium text-gray-500" title="Средний балл по аттестату">Ср. балл аттестата</th><th class="px-4 py-3 text-center font-medium text-gray-500" title="Средний балл по 3 профильным предметам">Балл по трем предметам</th><th class="px-4 py-3 text-center font-medium text-gray-500">Приор.</th></tr></thead>
     <tbody class="divide-y divide-gray-200">
       @forelse($ranking as $i => $app)
       @php $plan = $fundingType==='budget' ? $selectedProgram->plan_count : $selectedProgram->plan_count_paid; @endphp
@@ -38,10 +38,10 @@
           @if($app->is_benefit && $app->benefit_type === 'svo')
             <span class="inline-flex items-center text-primary-700 font-bold" title="Вне конкурса (СВО)">
               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-              6,00 ({{ number_format($app->app_avg_cert_score, 2, ',', '') }})
+              6,00 ({{ number_format($app->applicant->avg_cert_score ?? 0, 2, ',', '') }})
             </span>
           @else
-            {{ $app->app_avg_cert_score ? number_format($app->app_avg_cert_score, 2, ',', '') : '—' }}
+            {{ $app->applicant->avg_cert_score ? number_format($app->applicant->avg_cert_score, 2, ',', '') : '—' }}
           @endif
         </td>
         <td class="px-4 py-3 text-center font-bold">{{ number_format($app->average_score, 2, ',', '') }}</td>

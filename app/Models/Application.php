@@ -40,7 +40,6 @@ class Application extends Model
         'app_edu_doc_number',
         'app_edu_doc_issued_by',
         'app_edu_issue_date',
-        'app_avg_cert_score',
         'app_phone',
         'app_photo_passport',
         'app_photo_snils',
@@ -164,7 +163,6 @@ class Application extends Model
         $this->app_edu_doc_number = $applicant->edu_doc_number;
         $this->app_edu_doc_issued_by = $applicant->edu_doc_issued_by;
         $this->app_edu_issue_date = $applicant->edu_issue_date;
-        $this->app_avg_cert_score = $applicant->avg_cert_score;
         $this->app_phone = $applicant->phone;
         $this->app_photo_passport = $applicant->photo_passport;
         $this->app_photo_snils = $applicant->photo_snils;
@@ -182,7 +180,6 @@ class Application extends Model
             'is_first_spo' => 'boolean',
             'app_birth_date' => 'date',
             'app_edu_issue_date' => 'date',
-            'app_avg_cert_score' => 'decimal:2',
             'cancelled_at' => 'datetime',
         ];
     }

@@ -48,6 +48,9 @@
         <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer"><input type="checkbox" class="review-check w-4 h-4 text-primary-600 rounded"><span class="text-sm text-gray-700">Подпись на заявлении есть</span></label>
       </div>
 
+      <h3 class="font-medium text-gray-900 mb-2">Средний балл аттестата <span class="text-red-500">*</span></h3>
+      <input type="text" name="avg_cert_score" required value="{{ old('avg_cert_score', $application->applicant->avg_cert_score) }}" placeholder="4.50" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-primary-600 focus:border-primary-600" data-mask="avg-score">
+
       <h3 class="font-medium text-gray-900 mb-2">Комментарий сотрудника (обязателен при отклонении и доработке)</h3>
       <textarea id="rejection_reason" name="rejection_reason" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4" rows="2" placeholder="Причина отклонения или список правок...">{{ old('rejection_reason', $application->rejection_reason) }}</textarea>
 
@@ -121,6 +124,18 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('reviewForm').addEventListener('submit', function(e) {
     const decision = e.submitter?.value;
     if ((decision === 'rejected' || decision === 'rework_needed') && !document.getElementById('rejection_reason').value.trim()) { e.preventDefault(); alert('Укажите комментарий сотрудника!'); }
+  });
+
+  document.querySelector('[data-mask="avg-score"]')?.addEventListener('input', function() {
+    let value = this.value.replace(',', '.').replace(/[^\d.]/g, '');
+    const firstDot = value.indexOf('.');
+    if (firstDot !== -1) {
+      value = value.slice(0, firstDot + 1) + value.slice(firstDot + 1).replace(/\./g, '');
+    }
+    if (value.length > 4) value = value.slice(0, 4);
+    const numeric = parseFloat(value);
+    if (!Number.isNaN(numeric) && numeric > 5) value = '5';
+    this.value = value;
   });
 });
 function openZoom(src) { document.getElementById('zoomImg').src = src; document.getElementById('zoomOverlay').classList.add('active'); }

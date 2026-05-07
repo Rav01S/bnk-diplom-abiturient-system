@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Commission;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicationReviewRequest;
-use App\Models\AuditLog;
 use App\Models\Application;
+use App\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -31,6 +31,13 @@ class ReviewController extends Controller
             $application->rejection_reason = $validated['rejection_reason'];
         } else {
             $application->rejection_reason = null;
+        }
+
+        if ($request->filled('avg_cert_score')) {
+            // Также сохраняем в профиль абитуриента, чтобы данные подтягивались в будущие заявления
+            $application->applicant->update([
+                'avg_cert_score' => $validated['avg_cert_score'],
+            ]);
         }
 
         $application->save();

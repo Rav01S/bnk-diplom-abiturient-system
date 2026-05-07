@@ -8,10 +8,10 @@ use App\Models\ApplicationScore;
 use App\Models\Program;
 use App\Models\Specialty;
 use App\Models\User;
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Faker\Factory as Faker;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
 
         $templateImage = base_path('templates/заглушка.png');
         $hasTemplate = file_exists($templateImage);
-        
+
         $photosCreated = 0;
 
         $this->command->info('Начинаем заполнение базы данных...');
@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
         for ($i = 1; $i <= 15; $i++) {
             $specialties[] = Specialty::create([
                 'code' => $faker->unique()->numerify('##.02.0#'),
-                'name' => 'Специальность ' . $faker->word() . ' ' . $i,
+                'name' => 'Специальность '.$faker->word().' '.$i,
                 'subject_1' => 'Математика',
                 'subject_2' => 'Русский язык',
                 'subject_3' => $faker->randomElement(['Информатика', 'Обществознание', 'Физика', 'История']),
@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Создание 30 программ (подчиненная таблица)...');
         $programs = [];
         $currentYear = (int) date('Y');
-        
+
         foreach ($specialties as $specialty) {
             foreach ([0, 1] as $yearOffset) {
                 $programs[] = Program::create([
@@ -116,13 +116,13 @@ class DatabaseSeeder extends Seeder
                 'birth_date' => $faker->date('Y-m-d', '2008-01-01'),
                 'passport_series' => (string) $faker->numberBetween(1000, 9999),
                 'passport_number' => (string) $faker->numberBetween(100000, 999999),
-                'passport_issued_by' => 'ОУФМС ' . mb_substr($faker->city, 0, 50),
+                'passport_issued_by' => 'ОУФМС '.mb_substr($faker->city, 0, 50),
                 'snils' => $faker->numerify('###-###-### ##'),
-                'phone' => '+7 ' . $faker->numerify('(###) ###-##-##'),
+                'phone' => '+7 '.$faker->numerify('(###) ###-##-##'),
                 'prev_education' => $faker->randomElement(['9class', '11class']),
                 'edu_doc_series' => strtoupper(Str::random(2)),
                 'edu_doc_number' => (string) $faker->numberBetween(1000000, 9999999),
-                'edu_doc_issued_by' => mb_substr('Школа ' . $faker->company, 0, 50),
+                'edu_doc_issued_by' => mb_substr('Школа '.$faker->company, 0, 50),
                 'edu_issue_date' => $faker->date('Y-m-d', '2024-06-30'),
                 'avg_cert_score' => $faker->randomFloat(2, 3, 5),
             ], $photos));
@@ -133,7 +133,7 @@ class DatabaseSeeder extends Seeder
         // === Заявления (30 записей) ===
         $this->command->info('Создание 30 заявлений и снапшотов фото...');
         foreach ($applicants as $index => $applicant) {
-            $program = $programs[$index % 30]; 
+            $program = $programs[$index % 30];
 
             // Фотографии заявления
             $appPhotos = [];
@@ -145,7 +145,7 @@ class DatabaseSeeder extends Seeder
                 }
                 $appPhotos["app_photo_{$type}"] = $filename;
             }
-            
+
             $signedDocFilename = "documents/app_{$applicant->id}_{$program->id}_signed_doc.png";
             if ($hasTemplate) {
                 Storage::disk('public')->put($signedDocFilename, file_get_contents($templateImage));
@@ -177,7 +177,6 @@ class DatabaseSeeder extends Seeder
                 'app_edu_doc_number' => $applicant->edu_doc_number,
                 'app_edu_doc_issued_by' => $applicant->edu_doc_issued_by,
                 'app_edu_issue_date' => $applicant->edu_issue_date,
-                'app_avg_cert_score' => $applicant->avg_cert_score,
                 'app_phone' => $applicant->phone,
                 'signed_doc_photo' => $signedDocFilename,
             ], $appPhotos));
@@ -185,7 +184,7 @@ class DatabaseSeeder extends Seeder
             // Оценки по предметам для заявления
             $specialty = $program->specialty;
             $subjects = array_filter([$specialty->subject_1, $specialty->subject_2, $specialty->subject_3]);
-            
+
             foreach ($subjects as $subject) {
                 ApplicationScore::create([
                     'application_id' => $application->id,
