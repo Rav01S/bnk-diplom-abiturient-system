@@ -162,12 +162,6 @@ class Application extends Model
     public static function priorityBenefitTypes(): array
     {
         return [
-            self::BenefitOrphans,
-            self::BenefitWithoutParentalCare,
-            self::BenefitDisabledChildren,
-            self::BenefitDisabledGroupOne,
-            self::BenefitDisabledGroupTwo,
-            self::BenefitDisabledFromChildhood,
             self::BenefitMilitaryInjuryDisability,
             self::BenefitMilitaryDiseaseDisability,
             self::BenefitCombatVeterans,
@@ -203,7 +197,7 @@ class Application extends Model
 
     public function getBenefitBadgeLabelAttribute(): string
     {
-        return $this->hasSvoBenefit() ? 'СВО' : 'Льгота';
+        return 'Льгота';
     }
 
     /**
