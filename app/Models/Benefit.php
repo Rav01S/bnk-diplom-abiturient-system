@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 
 class Benefit extends Model
 {
-    private const CacheKey = 'benefits.all';
-
     public const BoostReplace = 'replace';
 
     public const BoostAdd = 'add';
+
+    /** @var Collection<int, self>|null */
+    private static ?Collection $memoized = null;
 
     /** @var array<int, string> */
     protected $fillable = [
@@ -29,7 +29,7 @@ class Benefit extends Model
     protected static function booted(): void
     {
         $flush = static function (): void {
-            Cache::forget(self::CacheKey);
+            self::$memoized = null;
         };
 
         static::saved($flush);
@@ -39,16 +39,14 @@ class Benefit extends Model
     /** @return Collection<int, self> */
     public static function allCached(): Collection
     {
-        $cached = Cache::get(self::CacheKey);
-
-        if ($cached instanceof Collection) {
-            return $cached;
+        if (self::$memoized instanceof Collection) {
+            return self::$memoized;
         }
 
-        $fresh = self::query()->orderBy('sort_order')->orderBy('label')->get();
-        Cache::forever(self::CacheKey, $fresh);
-
-        return $fresh;
+        return self::$memoized = self::query()
+            ->orderBy('sort_order')
+            ->orderBy('label')
+            ->get();
     }
 
     /** @return Collection<int, self> */
