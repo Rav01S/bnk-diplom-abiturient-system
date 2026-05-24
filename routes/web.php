@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\BenefitController;
 use App\Http\Controllers\Admin\CampaignController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SpecialtyController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Applicant\ApplicationController;
 use App\Http\Controllers\Applicant\DashboardController as ApplicantDashboardController;
 use App\Http\Controllers\Applicant\ProfileController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Commission\DashboardController as CommissionDashboardController;
 use App\Http\Controllers\Commission\QueueController;
@@ -42,8 +44,8 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 
 // === Общие для всех авторизованных ===
 Route::middleware('auth')->group(function (): void {
-    Route::get('/password', [\App\Http\Controllers\Auth\PasswordController::class, 'edit'])->name('password.edit');
-    Route::put('/password', [\App\Http\Controllers\Auth\PasswordController::class, 'update'])->name('password.update');
+    Route::get('/password', [PasswordController::class, 'edit'])->name('password.edit');
+    Route::put('/password', [PasswordController::class, 'update'])->name('password.update');
 });
 
 // === Абитуриент ===
@@ -103,6 +105,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::put('/programs/{program}', [SpecialtyController::class, 'updateProgram'])->name('programs.update');
     Route::delete('/programs/{program}', [SpecialtyController::class, 'destroyProgram'])->name('programs.destroy');
     Route::patch('/programs/{program}/toggle', [SpecialtyController::class, 'toggleProgram'])->name('programs.toggle');
+
+    // Льготы
+    Route::get('/benefits', [BenefitController::class, 'index'])->name('benefits');
+    Route::post('/benefits', [BenefitController::class, 'store'])->name('benefits.store');
+    Route::put('/benefits/{benefit}', [BenefitController::class, 'update'])->name('benefits.update');
+    Route::patch('/benefits/{benefit}/toggle', [BenefitController::class, 'toggle'])->name('benefits.toggle');
+    Route::delete('/benefits/{benefit}', [BenefitController::class, 'destroy'])->name('benefits.destroy');
 
     // Кампания
     Route::get('/campaign', [CampaignController::class, 'index'])->name('campaign');

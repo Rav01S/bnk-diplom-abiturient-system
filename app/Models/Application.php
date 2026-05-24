@@ -144,38 +144,30 @@ class Application extends Model
     /** @return array<string, string> */
     public static function benefitOptions(): array
     {
-        return [
-            self::BenefitOrphans => 'дети-сироты',
-            self::BenefitWithoutParentalCare => 'дети без попечения родителей',
-            self::BenefitDisabledChildren => 'дети-инвалиды',
-            self::BenefitDisabledGroupOne => 'инвалиды I группы',
-            self::BenefitDisabledGroupTwo => 'инвалиды II группы',
-            self::BenefitDisabledFromChildhood => 'инвалиды с детства',
-            self::BenefitMilitaryInjuryDisability => 'инвалиды вследствие военной травмы',
-            self::BenefitMilitaryDiseaseDisability => 'инвалиды вследствие заболевания полученного в период прохождения военной службы',
-            self::BenefitCombatVeterans => 'ветераны боевых действий',
-            self::BenefitSvoChildren => 'дети участников специальной военной операции',
-        ];
+        return Benefit::activeCached()
+            ->pluck('label', 'key')
+            ->all();
     }
 
     /** @return array<int, string> */
     public static function priorityBenefitTypes(): array
     {
-        return [
-            self::BenefitMilitaryInjuryDisability,
-            self::BenefitMilitaryDiseaseDisability,
-            self::BenefitCombatVeterans,
-            self::BenefitSvoChildren,
-            'svo',
-        ];
+        return Benefit::allCached()
+            ->where('gives_priority', true)
+            ->pluck('key')
+            ->values()
+            ->all();
     }
 
     public static function benefitLabelFor(?string $benefitType): ?string
     {
-        return self::benefitOptions()[$benefitType] ?? match ($benefitType) {
+        if ($benefitType === null || $benefitType === '') {
+            return null;
+        }
+
+        return Benefit::findByKey($benefitType)?->label ?? match ($benefitType) {
             'olympiad' => 'Олимпиада',
             'disability' => 'Инвалидность',
-            'svo' => 'СВО',
             default => $benefitType,
         };
     }
@@ -185,9 +177,49 @@ class Application extends Model
         return self::benefitLabelFor($this->benefit_type);
     }
 
+    public function benefit(): ?Benefit
+    {
+        return Benefit::findByKey($this->benefit_type);
+    }
+
     public function hasPriorityBenefit(): bool
     {
-        return $this->is_benefit && in_array($this->benefit_type, self::priorityBenefitTypes(), true);
+        if (! $this->is_benefit) {
+            return false;
+        }
+
+        return (bool) $this->benefit()?->gives_priority;
+    }
+
+    public function boostedCertScore(): ?float
+    {
+        if (! $this->is_benefit) {
+            return null;
+        }
+
+        $benefit = $this->benefit();
+        if ($benefit === null || $benefit->boost_mode === null || $benefit->boost_value === null) {
+            return null;
+        }
+
+        $real = (float) ($this->applicant?->avg_cert_score ?? 0);
+        $value = (float) $benefit->boost_value;
+
+        return match ($benefit->boost_mode) {
+            Benefit::BoostReplace => $value,
+            Benefit::BoostAdd => min(6.0, $real + $value),
+            default => null,
+        };
+    }
+
+    public function certScoreBoostMode(): ?string
+    {
+        return $this->is_benefit ? $this->benefit()?->boost_mode : null;
+    }
+
+    public function effectiveCertScore(): float
+    {
+        return $this->boostedCertScore() ?? (float) ($this->applicant?->avg_cert_score ?? 0);
     }
 
     public function hasSvoBenefit(): bool

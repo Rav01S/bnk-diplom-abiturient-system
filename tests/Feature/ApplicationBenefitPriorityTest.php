@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\Application;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('military and svo children benefits receive ranking priority', function (string $benefitType) {
     $application = new Application([

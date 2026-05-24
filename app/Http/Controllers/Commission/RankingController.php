@@ -45,7 +45,7 @@ class RankingController extends Controller
                 ->get()
                 ->sortByDesc(fn ($app) => [
                     $app->hasPriorityBenefit() ? 1 : 0,
-                    (float) $app->applicant->avg_cert_score,
+                    $app->effectiveCertScore(),
                     $app->average_score,
                     $app->is_benefit ? 1 : 0,
                 ])
@@ -70,7 +70,7 @@ class RankingController extends Controller
             ->get()
             ->sortByDesc(fn ($app) => [
                 $app->hasPriorityBenefit() ? 1 : 0,
-                (float) $app->applicant->avg_cert_score,
+                $app->effectiveCertScore(),
                 $app->average_score,
                 $app->is_benefit ? 1 : 0,
             ])
@@ -120,8 +120,9 @@ class RankingController extends Controller
                 $sheet->setCellValue('E'.$row, $app->funding_type === 'paid' ? '+' : '');
 
                 // Средний балл аттестата (F)
-                if ($app->hasPriorityBenefit()) {
-                    $sheet->setCellValue('F'.$row, '6,00 ('.number_format($app->applicant->avg_cert_score ?? 0, 2, ',', '').')');
+                $boosted = $app->boostedCertScore();
+                if ($boosted !== null) {
+                    $sheet->setCellValue('F'.$row, number_format($boosted, 2, ',', '').' ('.number_format($app->applicant->avg_cert_score ?? 0, 2, ',', '').')');
                 } else {
                     $sheet->setCellValue('F'.$row, $app->applicant->avg_cert_score ? (float) $app->applicant->avg_cert_score : '');
                 }

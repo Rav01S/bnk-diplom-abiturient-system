@@ -69,7 +69,7 @@ class RankingExportService
             ->get()
             ->sortByDesc(fn (Application $application) => [
                 $application->hasPriorityBenefit() ? 1 : 0,
-                (float) $application->applicant->avg_cert_score,
+                $application->effectiveCertScore(),
                 $application->average_score,
                 $application->is_benefit ? 1 : 0,
             ])
@@ -158,8 +158,8 @@ class RankingExportService
             $application->app_birth_date?->format('d.m.Y') ?? '',
             $fundingType === 'budget' ? 'Б' : 'П',
             $application->study_form === 'full_time' ? 'О' : 'З',
-            $application->hasPriorityBenefit()
-                ? '*6,00 ('.number_format($application->applicant->avg_cert_score ?? 0, 2, ',', '').')'
+            ($boosted = $application->boostedCertScore()) !== null
+                ? '*'.number_format($boosted, 2, ',', '').' ('.number_format($application->applicant->avg_cert_score ?? 0, 2, ',', '').')'
                 : number_format($application->applicant->avg_cert_score ?? 0, 2, ',', ''),
             number_format($application->average_score, 2, ',', ''),
             $application->doc_type === 'original' ? 'Оригинал' : 'Копия',
