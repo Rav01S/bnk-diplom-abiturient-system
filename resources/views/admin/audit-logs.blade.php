@@ -18,8 +18,8 @@
       <span class="text-sm font-medium text-gray-700">Действие</span>
       <select name="action" class="mt-1 w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white">
         <option value="">Все действия</option>
-        @foreach($actions as $action)
-          <option value="{{ $action }}" @selected(request('action') === $action)>{{ $action }}</option>
+        @foreach($actions as $value => $label)
+          <option value="{{ $value }}" @selected(request('action') === $value)>{{ $label }}</option>
         @endforeach
       </select>
     </label>
@@ -52,7 +52,7 @@
               <div class="mt-0.5 text-xs text-gray-500">{{ $log->user?->email ?? '—' }}</div>
             </td>
             <td class="px-4 py-3">
-              <span class="inline-flex rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-700">{{ $log->action }}</span>
+              <span class="inline-flex rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-700" title="{{ $log->action }}">{{ $log->action_label }}</span>
             </td>
             <td class="px-4 py-3 font-medium text-gray-900">{{ $log->subject ?? '—' }}</td>
             <td class="px-4 py-3 font-mono text-xs text-gray-600">{{ $log->ip_address ?? '—' }}</td>

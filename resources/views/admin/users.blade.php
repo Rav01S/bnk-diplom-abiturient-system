@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Сотрудники | Администрирование')
+@section('title', 'Пользователи | Администрирование')
 @section('header', 'Управление сотрудниками')
 @section('sidebar') @include('partials.sidebar-admin') @endsection
 

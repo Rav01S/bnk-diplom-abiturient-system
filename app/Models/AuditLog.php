@@ -19,6 +19,39 @@ class AuditLog extends Model
         'user_agent',
     ];
 
+    /**
+     * Человекочитаемые названия действий на русском языке.
+     *
+     * @var array<string, string>
+     */
+    public const ACTION_LABELS = [
+        'application.reviewed' => 'Рассмотрение заявления',
+        'benefit.created' => 'Создание льготы',
+        'benefit.updated' => 'Изменение льготы',
+        'benefit.toggled' => 'Включение/отключение льготы',
+        'benefit.deleted' => 'Удаление льготы',
+        'campaign.updated' => 'Изменение приёмной кампании',
+        'campaign.opened_all' => 'Открытие всех программ приёма',
+        'campaign.closed_all' => 'Закрытие всех программ приёма',
+        'staff.created' => 'Создание пользователя',
+        'user.updated' => 'Изменение пользователя',
+        'user.activated' => 'Активация пользователя',
+        'user.deactivated' => 'Деактивация пользователя',
+        'user.deleted' => 'Удаление пользователя',
+        'user.password_reset' => 'Сброс пароля пользователя',
+        'user.password_self_reset' => 'Смена собственного пароля',
+    ];
+
+    public static function actionLabel(string $action): string
+    {
+        return self::ACTION_LABELS[$action] ?? $action;
+    }
+
+    public function getActionLabelAttribute(): string
+    {
+        return self::actionLabel((string) $this->action);
+    }
+
     public static function record(Request $request, string $action, ?string $subject = null, array $details = []): void
     {
         try {

@@ -33,13 +33,17 @@ class AuditLogController extends Controller
             $query->where('action', (string) $request->string('action'));
         }
 
+        $actions = AuditLog::query()
+            ->select('action')
+            ->distinct()
+            ->pluck('action')
+            ->mapWithKeys(fn (string $action): array => [$action => AuditLog::actionLabel($action)])
+            ->sort()
+            ->all();
+
         return view('admin.audit-logs', [
             'logs' => $query->paginate(12)->withQueryString(),
-            'actions' => AuditLog::query()
-                ->select('action')
-                ->distinct()
-                ->orderBy('action')
-                ->pluck('action'),
+            'actions' => $actions,
         ]);
     }
 }
